@@ -75,6 +75,7 @@ public class CourseService {
                 .language(course.getLanguage())
                 .iconUrl(course.getIconUrl())
                 .description(course.getDescription())
+                .difficulty(course.getDifficulty())
                 .lessons(course.getLessons() != null ? course.getLessons().stream()
                         .map(this::convertToDTO)
                         .collect(Collectors.toList()) : List.of())

@@ -1,5 +1,6 @@
 package com.backend.duolingo.dto;
 
+import com.backend.duolingo.model.Difficulty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +19,6 @@ public class CourseDTO {
     private String language;
     private String iconUrl;
     private String description;
+    private Difficulty difficulty;
     private List<LessonDTO> lessons;
 }

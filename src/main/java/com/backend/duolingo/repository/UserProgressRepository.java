@@ -34,4 +34,14 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, UUID
     int countCompletedExercisesByUserAndLesson(
             @Param("userId") UUID userId,
             @Param("lessonId") UUID lessonId);
+
+    // Count how many exercises a user has correctly completed in a lesson
+    @Query("SELECT COUNT(up) FROM UserProgress up " +
+            "WHERE up.user.id = :userId " +
+            "AND up.exercise.lesson.id = :lessonId " +
+            "AND up.completed = true " +
+            "AND up.correct = true")
+    int countCorrectExercisesByUserAndLesson(
+            @Param("userId") UUID userId,
+            @Param("lessonId") UUID lessonId);
 }

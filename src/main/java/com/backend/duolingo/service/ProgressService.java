@@ -24,6 +24,7 @@ public class ProgressService {
     private final UserProgressRepository progressRepository;
     private final UserRepository userRepository;
     private final ExerciseRepository exerciseRepository;
+    private final LessonService lessonService;
 
     @Transactional
     public UserProgress submitExercise(UUID userId, UUID exerciseId, String answer) {
@@ -102,10 +103,20 @@ public class ProgressService {
 
     public LessonProgress getLessonProgress(UUID userId, UUID lessonId) {
         int completed = progressRepository.countCompletedExercisesByUserAndLesson(userId, lessonId);
-        // You'll need to get total exercises from LessonService
-        int totalExercises = 10; // Placeholder
+        int correct = progressRepository.countCorrectExercisesByUserAndLesson(userId, lessonId);
+        int totalExercises = lessonService.countExercisesInLesson(lessonId);
 
-        return new LessonProgress(completed, totalExercises);
+        int percentComplete = totalExercises > 0 ? (completed * 100) / totalExercises : 0;
+        int percentCorrect = completed > 0 ? (correct * 100) / completed : 0;
+
+        return LessonProgress.builder()
+                .lessonId(lessonId)
+                .completedExercises(completed)
+                .correctExercises(correct)
+                .totalExercises(totalExercises)
+                .percentComplete(percentComplete)
+                .percentCorrect(percentCorrect)
+                .build();
     }
 
     // Custom exception

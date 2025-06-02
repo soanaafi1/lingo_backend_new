@@ -24,6 +24,18 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final CourseRepository courseRepository;
 
+    @Transactional(readOnly = true)
+    public Lesson getLessonById(UUID lessonId) {
+        return lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with ID: " + lessonId));
+    }
+
+    @Transactional(readOnly = true)
+    public int countExercisesInLesson(UUID lessonId) {
+        Lesson lesson = getLessonById(lessonId);
+        return lesson.getExercises().size();
+    }
+
     @Transactional
     public Lesson createLesson(UUID courseId, Lesson lesson) {
         Course course = courseRepository.findById(courseId)

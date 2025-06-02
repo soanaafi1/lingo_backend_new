@@ -38,6 +38,9 @@ public class Course {
     private String iconUrl;
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    private Difficulty difficulty = Difficulty.BEGINNER;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("order ASC")
     @JsonIgnoreProperties("course")
