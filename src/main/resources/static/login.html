@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duolingo Clone Admin - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            background-color: #f5f5f5;
+        }
+        
+        .form-signin {
+            max-width: 330px;
+            padding: 15px;
+        }
+        
+        .form-signin .form-floating:focus-within {
+            z-index: 2;
+        }
+        
+        .form-signin input[type="text"] {
+            margin-bottom: -1px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .form-signin input[type="password"] {
+            margin-bottom: 10px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="text-center">
+    <main class="form-signin w-100 m-auto">
+        <form id="login-form">
+            <img class="logo" src="https://d35aaqx5ub95lt.cloudfront.net/images/owls/owl-happy.svg" alt="Duolingo Logo">
+            <h1 class="h3 mb-3 fw-normal">Admin Login</h1>
+            
+            <div class="form-floating">
+                <input type="text" class="form-control" id="username" placeholder="Username" required>
+                <label for="username">Username</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="password" placeholder="Password" required>
+                <label for="password">Password</label>
+            </div>
+            
+            <div class="alert alert-danger d-none" id="error-message"></div>
+            
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+            <p class="mt-5 mb-3 text-muted">&copy; 2023 Duolingo Clone</p>
+        </form>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if already authenticated
+            if (isAuthenticated()) {
+                window.location.href = '/index.html';
+            }
+            
+            // Handle login form submission
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorMessage = document.getElementById('error-message');
+                
+                try {
+                    errorMessage.classList.add('d-none');
+                    
+                    // Attempt login
+                    await login(username, password);
+                    
+                    // Redirect to admin panel on success
+                    window.location.href = '/index.html';
+                } catch (error) {
+                    // Show error message
+                    errorMessage.textContent = error.message || 'Login failed. Please check your credentials.';
+                    errorMessage.classList.remove('d-none');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
