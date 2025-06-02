@@ -298,36 +298,51 @@
                             <div class="mb-3">
                                 <label for="translation-correct-answer" class="form-label">Correct Answer</label>
                                 <input type="text" class="form-control" id="translation-correct-answer">
+                                <small class="form-text text-muted">Enter the exact text that will be considered correct.</small>
                             </div>
                         </div>
 
                         <div id="multiple-choice-fields" class="exercise-type-fields d-none">
                             <div class="mb-3">
-                                <label class="form-label">Options</label>
+                                <label class="form-label fw-bold">Multiple Choice Options</label>
+                                <p class="text-danger mb-2"><i class="bi bi-exclamation-circle"></i> <strong>Important:</strong> Click the radio button next to the option that should be the correct answer.</p>
                                 <div id="options-container">
                                     <div class="input-group mb-2">
-                                        <div class="input-group-text">
+                                        <div class="input-group-text bg-light">
                                             <input class="form-check-input mt-0 option-radio" type="radio" name="correctOption" value="0" checked>
+                                            <label class="ms-1 mb-0">Correct</label>
                                         </div>
                                         <input type="text" class="form-control option-input" placeholder="Option 1">
                                         <button class="btn btn-outline-danger remove-option" type="button">Remove</button>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-outline-primary btn-sm" id="add-option-btn">Add Option</button>
+                                <button type="button" class="btn btn-primary mt-2" id="add-option-btn"><i class="bi bi-plus-circle"></i> Add Another Option</button>
+                                <div class="alert alert-info mt-2">
+                                    <small><i class="bi bi-info-circle"></i> The option with the selected radio button will be considered the correct answer. Make sure to select one!</small>
+                                </div>
                             </div>
                         </div>
 
                         <div id="matching-fields" class="exercise-type-fields d-none">
                             <div class="mb-3">
-                                <label class="form-label">Matching Pairs</label>
+                                <label class="form-label fw-bold">Matching Pairs</label>
+                                <p class="text-danger mb-2"><i class="bi bi-exclamation-circle"></i> <strong>Important:</strong> Add all key-value pairs that should be matched correctly.</p>
                                 <div id="pairs-container">
                                     <div class="input-group mb-2">
-                                        <input type="text" class="form-control pair-key" placeholder="Key">
-                                        <input type="text" class="form-control pair-value" placeholder="Value">
+                                        <span class="input-group-text bg-light">Key</span>
+                                        <input type="text" class="form-control pair-key" placeholder="Enter key">
+                                        <span class="input-group-text bg-light">Value</span>
+                                        <input type="text" class="form-control pair-value" placeholder="Enter matching value">
                                         <button class="btn btn-outline-danger remove-pair" type="button">Remove</button>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-outline-primary btn-sm" id="add-pair-btn">Add Pair</button>
+                                <button type="button" class="btn btn-primary mt-2" id="add-pair-btn"><i class="bi bi-plus-circle"></i> Add Another Pair</button>
+                                <div class="alert alert-info mt-2">
+                                    <small><i class="bi bi-info-circle"></i> <strong>All pairs added here will be considered correct matches.</strong> Users will need to match each key with its corresponding value.</small>
+                                </div>
+                                <div class="alert alert-warning mt-2">
+                                    <small><i class="bi bi-lightbulb"></i> <strong>Tip:</strong> Add at least 3-4 pairs to make the exercise challenging.</small>
+                                </div>
                             </div>
                         </div>
                     </form>

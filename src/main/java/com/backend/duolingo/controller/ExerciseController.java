@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static com.backend.duolingo.controller.AdminController.getExercise;
+
 @RestController
 @RequestMapping("/api/exercises")
 @RequiredArgsConstructor
@@ -40,11 +42,11 @@ public class ExerciseController {
                 .hint(exercise.getHint())
                 .order(exercise.getExerciseOrder())
                 .xpReward(exercise.getXpReward())
-                .heartsCost(exercise.getHeartsCost());
+                .heartsCost(exercise.getHeartsCost())
+                .correctAnswer(exercise.getCorrectAnswer());
 
         switch (exercise) {
-            case TranslationExercise translationExercise -> builder.type("translation")
-                    .correctAnswer(translationExercise.getCorrectAnswer());
+            case TranslationExercise translationExercise -> builder.type("translation");
             case MultipleChoiceExercise multipleChoiceExercise -> builder.type("multiple_choice")
                     .options(multipleChoiceExercise.getOptions())
                     .correctOptionIndex(multipleChoiceExercise.getCorrectOptionIndex());
@@ -67,36 +69,6 @@ public class ExerciseController {
     }
 
     private Exercise convertToExercise(ExerciseDTO dto) {
-        return switch (dto.getType()) {
-            case "translation" -> TranslationExercise.builder()
-                    .id(dto.getId())
-                    .question(dto.getQuestion())
-                    .hint(dto.getHint())
-                    .exerciseOrder(dto.getOrder())
-                    .xpReward(dto.getXpReward())
-                    .heartsCost(dto.getHeartsCost())
-                    .correctAnswer(dto.getCorrectAnswer())
-                    .build();
-            case "multiple_choice" -> MultipleChoiceExercise.builder()
-                    .id(dto.getId())
-                    .question(dto.getQuestion())
-                    .hint(dto.getHint())
-                    .exerciseOrder(dto.getOrder())
-                    .xpReward(dto.getXpReward())
-                    .heartsCost(dto.getHeartsCost())
-                    .options(dto.getOptions())
-                    .correctOptionIndex(dto.getCorrectOptionIndex())
-                    .build();
-            case "matching" -> MatchingExercise.builder()
-                    .id(dto.getId())
-                    .question(dto.getQuestion())
-                    .hint(dto.getHint())
-                    .exerciseOrder(dto.getOrder())
-                    .xpReward(dto.getXpReward())
-                    .heartsCost(dto.getHeartsCost())
-                    .pairs(dto.getPairs())
-                    .build();
-            default -> throw new IllegalArgumentException("Unknown exercise type: " + dto.getType());
-        };
+        return getExercise(dto);
     }
 }

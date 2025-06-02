@@ -19,4 +19,5 @@ public class LoginResponse {
     private int hearts;
     private Role role;
     private List<String> authorities;
+    private String avatarUrl;
 }

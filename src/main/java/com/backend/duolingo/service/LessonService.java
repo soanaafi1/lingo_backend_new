@@ -40,7 +40,7 @@ public class LessonService {
                 .collect(Collectors.toList());
     }
 
-    private LessonDTO convertToDTO(Lesson lesson) {
+    public LessonDTO convertToDTO(Lesson lesson) {
         List<ExerciseDTO> exerciseDTOs = lesson.getExercises().stream()
                 .map(this::convertExerciseToDTO)
                 .collect(Collectors.toList());

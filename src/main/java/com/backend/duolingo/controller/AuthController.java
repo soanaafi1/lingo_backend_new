@@ -3,6 +3,7 @@ package com.backend.duolingo.controller;
 import com.backend.duolingo.dto.LoginRequest;
 import com.backend.duolingo.dto.LoginResponse;
 import com.backend.duolingo.dto.RegisterRequest;
+import com.backend.duolingo.dto.UpdateAvatarRequest;
 import com.backend.duolingo.model.Role;
 import com.backend.duolingo.model.User;
 import com.backend.duolingo.repository.UserRepository;
@@ -15,7 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,6 +61,7 @@ public class AuthController {
                 .hearts(user.getHearts())
                 .role(user.getRole())
                 .authorities(authoritiesAsStrings)
+                .avatarUrl(user.getAvatarUrl())
                 .build());
     }
 
@@ -84,9 +88,33 @@ public class AuthController {
                 .hearts(5)
                 .lastHeartRefill(now)
                 .role(Role.USER)
+                .avatarUrl("https://ui-avatars.com/api/?name=" + request.getUsername())
                 .build();
 
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully");
+    }
+
+    @PutMapping("/update-avatar")
+    public ResponseEntity<LoginResponse> updateAvatar(@AuthenticationPrincipal User user, @RequestBody UpdateAvatarRequest request) {
+        user.setAvatarUrl(request.getAvatarUrl());
+        userRepository.save(user);
+
+        // Extract authorities as strings
+        List<String> authoritiesAsStrings = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(LoginResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .xpPoints(user.getXpPoints())
+                .streak(user.getStreak())
+                .hearts(user.getHearts())
+                .role(user.getRole())
+                .authorities(authoritiesAsStrings)
+                .avatarUrl(user.getAvatarUrl())
+                .build());
     }
 }

@@ -8,15 +8,17 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@DiscriminatorValue("TRANSLATION")
+@DiscriminatorValue("translation")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 public class TranslationExercise extends Exercise {
-    @Column(nullable = false)
-    private String correctAnswer;
+
+    @Column(name = "correct_index", nullable = false)
+    private int correctOptionIndex = 0; // Default value to satisfy not-null constraint
 
     public TranslationExercise() {
+
 
     }
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "exercise_type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "exercise_type")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,6 +56,8 @@ public abstract class Exercise {
     private int xpReward;
     private int heartsCost;
 
-    // Template method pattern for validation
+    @Column(name = "correct_answer")
+    protected String correctAnswer;
+
     public abstract boolean validateAnswer(String answer);
 }

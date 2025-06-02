@@ -23,10 +23,12 @@ public class LessonController {
     }
 
     @PostMapping("/course/{courseId}")
-    public ResponseEntity<Lesson> createLesson(
+    public ResponseEntity<LessonDTO> createLesson(
             @PathVariable UUID courseId,
             @RequestBody Lesson lesson) {
+        Lesson createdLesson = lessonService.createLesson(courseId, lesson);
+        LessonDTO lessonDTO = lessonService.convertToDTO(createdLesson);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(lessonService.createLesson(courseId, lesson));
+                .body(lessonDTO);
     }
 }

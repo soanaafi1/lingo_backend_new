@@ -47,4 +47,10 @@ public class ExerciseService {
 
         exerciseRepository.delete(exercise);
     }
+
+    @Transactional(readOnly = true)
+    public Exercise getExerciseById(UUID exerciseId) {
+        return exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
+    }
 }

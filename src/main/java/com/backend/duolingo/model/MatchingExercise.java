@@ -1,6 +1,7 @@
 package com.backend.duolingo.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.DiscriminatorValue;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
@@ -11,16 +12,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Entity
-@DiscriminatorValue("MATCHING")
+@DiscriminatorValue("matching")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 public class MatchingExercise extends Exercise {
-    @ElementCollection
-    @CollectionTable(name = "exercise_options", joinColumns = @JoinColumn(name = "exercise_id"))
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "matching_exercise_pairs", joinColumns = @JoinColumn(name = "exercise_id"))
     @MapKeyColumn(name = "key")
     @Column(name = "value")
     private Map<String, String> pairs = new HashMap<>();
+
+    @Column(name = "correct_index", nullable = false)
+    private int correctOptionIndex = 0; // Default value to satisfy not-null constraint
 
     public MatchingExercise() {
 

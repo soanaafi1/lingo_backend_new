@@ -11,7 +11,6 @@ import com.backend.duolingo.model.User;
 import com.backend.duolingo.model.TranslationExercise;
 import com.backend.duolingo.model.MultipleChoiceExercise;
 import com.backend.duolingo.model.MatchingExercise;
-import com.backend.duolingo.controller.ExerciseController;
 import com.backend.duolingo.repository.UserRepository;
 import com.backend.duolingo.service.CourseService;
 import com.backend.duolingo.service.ExerciseService;
@@ -72,15 +71,19 @@ public class AdminController {
     }
 
     @PostMapping("/lessons/course/{courseId}")
-    public ResponseEntity<Lesson> createLesson(@PathVariable UUID courseId, @RequestBody Lesson lesson) {
+    public ResponseEntity<LessonDTO> createLesson(@PathVariable UUID courseId, @RequestBody Lesson lesson) {
+        Lesson createdLesson = lessonService.createLesson(courseId, lesson);
+        LessonDTO lessonDTO = lessonService.convertToDTO(createdLesson);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(lessonService.createLesson(courseId, lesson));
+                .body(lessonDTO);
     }
 
     @PutMapping("/lessons/{id}")
-    public ResponseEntity<Lesson> updateLesson(@PathVariable UUID id, @RequestBody Lesson lesson) {
+    public ResponseEntity<LessonDTO> updateLesson(@PathVariable UUID id, @RequestBody Lesson lesson) {
         lesson.setId(id);
-        return ResponseEntity.ok(lessonService.updateLesson(lesson));
+        Lesson updatedLesson = lessonService.updateLesson(lesson);
+        LessonDTO lessonDTO = lessonService.convertToDTO(updatedLesson);
+        return ResponseEntity.ok(lessonDTO);
     }
 
     @DeleteMapping("/lessons/{id}")
@@ -116,37 +119,78 @@ public class AdminController {
     }
 
     private Exercise convertToExercise(ExerciseDTO dto) {
+        return getExercise(dto);
+    }
+
+    static Exercise getExercise(ExerciseDTO dto) {
+        if (dto.getType() == null) {
+            throw new IllegalArgumentException("Exercise type cannot be null. Please specify a valid type (translation, multiple_choice, or matching).");
+        }
+
         return switch (dto.getType()) {
-            case "translation" -> TranslationExercise.builder()
-                    .id(dto.getId())
-                    .question(dto.getQuestion())
-                    .hint(dto.getHint())
-                    .exerciseOrder(dto.getOrder())
-                    .xpReward(dto.getXpReward())
-                    .heartsCost(dto.getHeartsCost())
-                    .correctAnswer(dto.getCorrectAnswer())
-                    .build();
-            case "multiple_choice" -> MultipleChoiceExercise.builder()
-                    .id(dto.getId())
-                    .question(dto.getQuestion())
-                    .hint(dto.getHint())
-                    .exerciseOrder(dto.getOrder())
-                    .xpReward(dto.getXpReward())
-                    .heartsCost(dto.getHeartsCost())
-                    .options(dto.getOptions())
-                    .correctOptionIndex(dto.getCorrectOptionIndex())
-                    .build();
-            case "matching" -> MatchingExercise.builder()
-                    .id(dto.getId())
-                    .question(dto.getQuestion())
-                    .hint(dto.getHint())
-                    .exerciseOrder(dto.getOrder())
-                    .xpReward(dto.getXpReward())
-                    .heartsCost(dto.getHeartsCost())
-                    .pairs(dto.getPairs())
-                    .build();
+            case "translation" -> {
+                    TranslationExercise exercise = TranslationExercise.builder()
+                        .id(dto.getId())
+                        .question(dto.getQuestion())
+                        .hint(dto.getHint())
+                        .exerciseOrder(dto.getOrder())
+                        .xpReward(dto.getXpReward())
+                        .heartsCost(dto.getHeartsCost())
+                        .correctAnswer(dto.getCorrectAnswer())
+                        .build();
+
+                    // Set a default value for correctOptionIndex to satisfy not-null constraint
+                    exercise.setCorrectOptionIndex(0);
+
+                    yield exercise;
+                }
+            case "multiple_choice" -> {
+                    List<String> options = dto.getOptions();
+                    int correctIndex = dto.getCorrectOptionIndex();
+                    String correctAnswer = (options != null && correctIndex >= 0 && correctIndex < options.size())
+                        ? options.get(correctIndex)
+                        : "No correct answer";
+
+                    yield MultipleChoiceExercise.builder()
+                        .id(dto.getId())
+                        .question(dto.getQuestion())
+                        .hint(dto.getHint())
+                        .exerciseOrder(dto.getOrder())
+                        .xpReward(dto.getXpReward())
+                        .heartsCost(dto.getHeartsCost())
+                        .options(options)
+                        .correctOptionIndex(correctIndex)
+                        .correctAnswer(correctAnswer)
+                        .build();
+                }
+            case "matching" -> {
+                    Map<String, String> pairs = dto.getPairs();
+                    // Create a string representation of the pairs map
+                    String correctAnswer = pairs != null ?
+                        pairs.entrySet().stream()
+                            .map(entry -> entry.getKey() + ":" + entry.getValue())
+                            .collect(java.util.stream.Collectors.joining(","))
+                        : "No pairs";
+
+                    yield MatchingExercise.builder()
+                        .id(dto.getId())
+                        .question(dto.getQuestion())
+                        .hint(dto.getHint())
+                        .exerciseOrder(dto.getOrder())
+                        .xpReward(dto.getXpReward())
+                        .heartsCost(dto.getHeartsCost())
+                        .pairs(pairs)
+                        .correctAnswer(correctAnswer)
+                        .build();
+                }
             default -> throw new IllegalArgumentException("Unknown exercise type: " + dto.getType());
         };
+    }
+
+    @GetMapping("/exercises/{id}")
+    public ResponseEntity<ExerciseDTO> getExerciseById(@PathVariable UUID id) {
+        Exercise exercise = exerciseService.getExerciseById(id);
+        return ResponseEntity.ok(ExerciseController.getExerciseDTO(exercise));
     }
 
     @DeleteMapping("/exercises/{id}")
