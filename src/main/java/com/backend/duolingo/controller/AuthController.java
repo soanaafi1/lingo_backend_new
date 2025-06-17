@@ -4,6 +4,8 @@ import com.backend.duolingo.dto.LoginRequest;
 import com.backend.duolingo.dto.LoginResponse;
 import com.backend.duolingo.dto.RegisterRequest;
 import com.backend.duolingo.dto.UpdateAvatarRequest;
+import com.backend.duolingo.model.Difficulty;
+import com.backend.duolingo.model.Language;
 import com.backend.duolingo.model.Role;
 import com.backend.duolingo.model.User;
 import com.backend.duolingo.repository.UserRepository;
@@ -15,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +27,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,7 +45,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = (User) authentication.getPrincipal();
@@ -54,7 +59,7 @@ public class AuthController {
         return ResponseEntity.ok(LoginResponse.builder()
                 .token(jwt)
                 .id(user.getId())
-                .username(user.getUsername())
+                .fullName(user.getFullName())
                 .email(user.getEmail())
                 .xpPoints(user.getXpPoints())
                 .streak(user.getStreak())
@@ -67,10 +72,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().body("Username already taken");
-        }
-
         if (userRepository.existsByEmail(request.getEmail())) {
             return ResponseEntity.badRequest().body("Email already in use");
         }
@@ -78,7 +79,7 @@ public class AuthController {
         LocalDateTime now = LocalDateTime.now();
 
         User user = User.builder()
-                .username(request.getUsername())
+                .fullName(request.getFullName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .xpPoints(0)
@@ -88,7 +89,9 @@ public class AuthController {
                 .hearts(5)
                 .lastHeartRefill(now)
                 .role(Role.USER)
-                .avatarUrl("https://ui-avatars.com/api/?name=" + request.getUsername())
+                .avatarUrl("https://ui-avatars.com/api/?name=" + request.getFullName())
+                .languages(request.getLanguage() != null ? request.getLanguage() : new HashMap<>())
+                .age(request.getAge())
                 .build();
 
         userRepository.save(user);
@@ -107,7 +110,7 @@ public class AuthController {
 
         return ResponseEntity.ok(LoginResponse.builder()
                 .id(user.getId())
-                .username(user.getUsername())
+                .fullName(user.getFullName())
                 .email(user.getEmail())
                 .xpPoints(user.getXpPoints())
                 .streak(user.getStreak())

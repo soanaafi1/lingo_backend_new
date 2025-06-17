@@ -79,17 +79,16 @@ public class FriendController {
         String friendUsername = request.get("username");
         
         // Find the friend user
-        User friend = userRepository.findByUsername(friendUsername)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User friend = (User) userRepository.findByFullName(friendUsername);
         
         // Check if they're already friends
-        Optional<Friendship> existingFriendship = friendshipRepository.findByUserAndFriend(currentUser, friend);
+        Optional<Friendship> existingFriendship = friendshipRepository.findByUserAndFriend(currentUser, Optional.ofNullable(friend));
         if (existingFriendship.isPresent()) {
             return ResponseEntity.badRequest().body("Friend request already exists");
         }
         
         // Check if friend request already exists in the other direction
-        Optional<Friendship> reverseRequest = friendshipRepository.findByUserAndFriend(friend, currentUser);
+        Optional<Friendship> reverseRequest = friendshipRepository.findByUserAndFriend(friend, Optional.ofNullable(currentUser));
         if (reverseRequest.isPresent()) {
             return ResponseEntity.badRequest().body("Friend request already exists in the other direction");
         }
@@ -175,7 +174,7 @@ public class FriendController {
         User currentUser = getUserFromToken(token);
         
         // Find users whose username contains the query
-        List<User> users = userRepository.findByUsernameContainingIgnoreCase(query);
+        List<User> users = userRepository.findByFullName(query);
         
         // Remove current user from results
         users = users.stream()
@@ -186,8 +185,8 @@ public class FriendController {
         List<FriendDTO> results = users.stream()
                 .map(user -> {
                     // Check if there's an existing friendship
-                    Optional<Friendship> friendship = friendshipRepository.findByUserAndFriend(currentUser, user);
-                    Optional<Friendship> reverseFriendship = friendshipRepository.findByUserAndFriend(user, currentUser);
+                    Optional<Friendship> friendship = friendshipRepository.findByUserAndFriend(currentUser, Optional.ofNullable(user));
+                    Optional<Friendship> reverseFriendship = friendshipRepository.findByUserAndFriend(user, Optional.of(currentUser));
                     
                     boolean isPending = false;
                     boolean isAccepted = false;
@@ -204,7 +203,7 @@ public class FriendController {
                     
                     return FriendDTO.builder()
                             .userId(user.getId())
-                            .username(user.getUsername())
+                            .fullName(user.getFullName())
                             .xpPoints(user.getXpPoints())
                             .streak(user.getStreak())
                             .isPending(isPending)
@@ -234,7 +233,7 @@ public class FriendController {
         return FriendDTO.builder()
                 .id(friendship.getId())
                 .userId(friend.getId())
-                .username(friend.getUsername())
+                .fullName(friend.getFullName())
                 .xpPoints(friend.getXpPoints())
                 .streak(friend.getStreak())
                 .accepted(friendship.isAccepted())

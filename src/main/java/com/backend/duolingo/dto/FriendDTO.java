@@ -15,7 +15,7 @@ import java.util.UUID;
 public class FriendDTO {
     private UUID id;
     private UUID userId;
-    private String username;
+    private String fullName;
     private int xpPoints;
     private int streak;
     private boolean accepted;

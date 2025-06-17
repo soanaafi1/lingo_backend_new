@@ -55,9 +55,14 @@ This document provides a comprehensive guide to all API endpoints available in t
 **Request:**
 ```json
 {
-  "username": "newuser",
-  "email": "newuser@example.com",
-  "password": "password123"
+  "fullName": "newuser",
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "language": {
+    "SPANISH": "BEGINNER",
+    "FRENCH": "INTERMEDIATE"
+  },
+  "age": 30
 }
 ```
 

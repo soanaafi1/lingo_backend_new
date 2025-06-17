@@ -26,5 +26,5 @@ public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
     List<Friendship> findAllPendingByUser(User user);
     
     // Find a friendship between two users
-    Optional<Friendship> findByUserAndFriend(User user, User friend);
+    Optional<Friendship> findByUserAndFriend(User user, Optional<User> friend);
 }

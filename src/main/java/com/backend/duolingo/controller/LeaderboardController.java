@@ -49,7 +49,7 @@ public class LeaderboardController {
             User user = topUsers.get(i);
             leaderboard.add(LeaderboardEntryDTO.builder()
                     .userId(user.getId())
-                    .username(user.getUsername())
+                    .fullName(user.getFullName())
                     .xpPoints(user.getXpPoints())
                     .streak(user.getStreak())
                     .rank(i + 1)
@@ -105,7 +105,7 @@ public class LeaderboardController {
             User user = usersInRange.get(i);
             leaderboard.add(LeaderboardEntryDTO.builder()
                     .userId(user.getId())
-                    .username(user.getUsername())
+                    .fullName(user.getFullName())
                     .xpPoints(user.getXpPoints())
                     .streak(user.getStreak())
                     .rank(startIndex + i + 1)

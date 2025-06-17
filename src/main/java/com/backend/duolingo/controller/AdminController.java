@@ -202,9 +202,9 @@ public class AdminController {
     // User management endpoints
     @PostMapping("/users/make-admin")
     public ResponseEntity<String> createAdminUser(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
+        String email = request.get("email");
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         user.setRole(Role.ADMIN);

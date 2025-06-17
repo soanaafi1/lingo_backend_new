@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class LeaderboardEntryDTO {
     private UUID userId;
-    private String username;
+    private String fullName;
     private int xpPoints;
     private int streak;
     private int rank;

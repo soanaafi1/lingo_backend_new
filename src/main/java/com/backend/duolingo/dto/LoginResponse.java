@@ -12,7 +12,7 @@ import java.util.UUID;
 public class LoginResponse {
     private String token;
     private UUID id;
-    private String username;
+    private String fullName;
     private String email;
     private int xpPoints;
     private int streak;
