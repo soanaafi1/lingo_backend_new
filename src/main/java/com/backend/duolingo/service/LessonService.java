@@ -1,8 +1,8 @@
 package com.backend.duolingo.service;
 
 import com.backend.duolingo.controller.ExerciseController;
-import com.backend.duolingo.dto.ExerciseDTO;
-import com.backend.duolingo.dto.LessonDTO;
+import com.backend.duolingo.dto.exercise.ExerciseDTO;
+import com.backend.duolingo.dto.lesson.LessonDTO;
 import com.backend.duolingo.exception.*;
 import com.backend.duolingo.model.Course;
 import com.backend.duolingo.model.Exercise;
@@ -139,9 +139,6 @@ public class LessonService {
         if (lesson.getTitle() == null || lesson.getTitle().isBlank()) {
             throw new BadRequestException("Lesson title is required");
         }
-        if (lesson.getOrder() < 0) {
-            throw new BadRequestException("Lesson order cannot be negative");
-        }
         if (lesson.getXpReward() < 0) {
             throw new BadRequestException("XP reward cannot be negative");
         }
@@ -155,8 +152,6 @@ public class LessonService {
         return LessonDTO.builder()
                 .id(lesson.getId())
                 .title(lesson.getTitle())
-                .order(lesson.getOrder())
-                .iconUrl(lesson.getIconUrl())
                 .xpReward(lesson.getXpReward())
                 .exercises(exerciseDTOs)
                 .build();

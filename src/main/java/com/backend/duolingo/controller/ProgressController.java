@@ -1,8 +1,7 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.LessonProgress;
-import com.backend.duolingo.dto.UserProgressResponse;
-import com.backend.duolingo.model.User;
+import com.backend.duolingo.dto.progress.LessonProgress;
+import com.backend.duolingo.dto.progress.UserProgressResponse;
 import com.backend.duolingo.model.UserProgress;
 import com.backend.duolingo.security.JwtUtils;
 import com.backend.duolingo.security.UserDetailsServiceImpl;

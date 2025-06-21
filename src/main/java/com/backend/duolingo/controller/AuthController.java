@@ -1,6 +1,6 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.*;
+import com.backend.duolingo.dto.auth.*;
 import com.backend.duolingo.exception.*;
 import com.backend.duolingo.model.*;
 import com.backend.duolingo.repository.UserRepository;
@@ -20,7 +20,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;

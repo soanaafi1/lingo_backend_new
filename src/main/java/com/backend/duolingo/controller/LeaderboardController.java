@@ -1,6 +1,6 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.LeaderboardEntryDTO;
+import com.backend.duolingo.dto.user.LeaderboardEntryDTO;
 import com.backend.duolingo.model.User;
 import com.backend.duolingo.repository.UserRepository;
 import com.backend.duolingo.security.JwtUtils;

@@ -1,12 +1,11 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.UpdateAvatarRequest;
+import com.backend.duolingo.dto.user.UpdateAvatarRequest;
 import com.backend.duolingo.exception.BadRequestException;
 import com.backend.duolingo.exception.InternalServerErrorException;
 import com.backend.duolingo.model.User;
 import com.backend.duolingo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -1,4 +1,4 @@
-package com.backend.duolingo.dto;
+package com.backend.duolingo.dto.course;
 
 import com.backend.duolingo.model.Difficulty;
 import com.backend.duolingo.model.Language;

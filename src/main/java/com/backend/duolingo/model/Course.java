@@ -44,7 +44,6 @@ public class Course {
     private Difficulty difficulty = Difficulty.BEGINNER;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("order ASC")
     @JsonIgnoreProperties("course")
     private List<Lesson> lessons = new ArrayList<>();
 

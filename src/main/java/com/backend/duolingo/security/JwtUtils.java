@@ -1,5 +1,6 @@
 package com.backend.duolingo.security;
 
+import com.backend.duolingo.exception.InvalidTokenException;
 import com.backend.duolingo.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -57,7 +58,7 @@ public class JwtUtils {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
-                .signWith(getRefreshSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getRefreshSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -81,9 +82,11 @@ public class JwtUtils {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new JwtException("JWT token expired");
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtException("Invalid JWT token");
+            throw new InvalidTokenException("Token expired");
+        } catch (MalformedJwtException e) {
+            throw new InvalidTokenException("Invalid token");
+        } catch (JwtException e) {
+            throw new InvalidTokenException("Token validation failed");
         }
     }
 

@@ -32,11 +32,6 @@ public class Lesson {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "lesson_order", nullable = false)
-    private int order;
-
-    private String iconUrl;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     @JsonIgnoreProperties("lessons")

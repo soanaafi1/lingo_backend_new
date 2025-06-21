@@ -1,4 +1,4 @@
-package com.backend.duolingo.dto;
+package com.backend.duolingo.dto.progress;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

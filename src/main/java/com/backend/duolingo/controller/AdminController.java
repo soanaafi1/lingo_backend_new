@@ -1,10 +1,13 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.*;
+import com.backend.duolingo.dto.course.CourseDTO;
+import com.backend.duolingo.dto.course.CreateCourseRequest;
+import com.backend.duolingo.dto.course.GetAllCoursesResponse;
+import com.backend.duolingo.dto.exercise.ExerciseDTO;
+import com.backend.duolingo.dto.lesson.LessonDTO;
 import com.backend.duolingo.exception.*;
 import com.backend.duolingo.model.*;
 import com.backend.duolingo.repository.UserRepository;
-import com.backend.duolingo.service.AppStatsService;
 import com.backend.duolingo.service.CourseService;
 import com.backend.duolingo.service.ExerciseService;
 import com.backend.duolingo.service.LessonService;

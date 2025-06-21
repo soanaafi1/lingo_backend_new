@@ -1,8 +1,11 @@
 package com.backend.duolingo.security;
 
+import com.backend.duolingo.exception.InvalidTokenException;
+import com.backend.duolingo.exception.UnauthenticatedException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,21 +39,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
-    ) throws IOException {
+    ) throws ServletException, IOException {
         try {
             final String authHeader = request.getHeader("Authorization");
 
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                sendError(response, HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
-                return;
+                throw new UnauthenticatedException("Missing or invalid Authorization header");
             }
 
             final String jwt = authHeader.substring(7);
 
-            if (!jwtUtils.validateAccessToken(jwt)) {
-                sendError(response, HttpStatus.UNAUTHORIZED, "Invalid access token");
-                return;
-            }
+            jwtUtils.validateAccessToken(jwt);
 
             final UUID userId = jwtUtils.getUserIdFromToken(jwt);
 
@@ -69,22 +68,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException ex) {
-            sendError(response, HttpStatus.UNAUTHORIZED, "Token expired");
+            handleException(response, new UnauthenticatedException("Expired access token"));
         } catch (JwtException ex) {
-            sendError(response, HttpStatus.UNAUTHORIZED, ex.getMessage());
-        } catch (Exception ex) {
-            sendError(response, HttpStatus.INTERNAL_SERVER_ERROR, "Authentication failed");
+            handleException(response, new InvalidTokenException("Invalid token"));
+        } catch (UnauthenticatedException | InvalidTokenException ex) {
+            handleException(response, ex);
         }
     }
 
-    private void sendError(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+    private void handleException(HttpServletResponse response, RuntimeException ex) throws IOException {
         response.setContentType("application/json");
-        response.setStatus(status.value());
-        response.getWriter().write(String.format(
-                "{\"status\":%d,\"error\":\"%s\",\"message\":\"%s\"}",
-                status.value(),
-                status.getReasonPhrase(),
-                message
-        ));
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(String.format("{\"message\":\"%s\"}", ex.getMessage()));
     }
 }

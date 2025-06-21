@@ -1,4 +1,4 @@
-package com.backend.duolingo.dto;
+package com.backend.duolingo.dto.auth;
 
 import com.backend.duolingo.model.Role;
 import lombok.Builder;

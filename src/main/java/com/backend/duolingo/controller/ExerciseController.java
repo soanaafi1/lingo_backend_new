@@ -1,6 +1,6 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.ExerciseDTO;
+import com.backend.duolingo.dto.exercise.ExerciseDTO;
 import com.backend.duolingo.exception.InternalServerErrorException;
 import com.backend.duolingo.model.Exercise;
 import com.backend.duolingo.model.MatchingExercise;

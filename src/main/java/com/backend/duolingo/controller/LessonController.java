@@ -1,6 +1,6 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.LessonDTO;
+import com.backend.duolingo.dto.lesson.LessonDTO;
 import com.backend.duolingo.service.LessonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

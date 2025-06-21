@@ -1,4 +1,4 @@
-package com.backend.duolingo.dto;
+package com.backend.duolingo.dto.auth;
 
 import com.backend.duolingo.model.Difficulty;
 import com.backend.duolingo.model.Language;
@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.List;
 import java.util.Map;
 
 @Data

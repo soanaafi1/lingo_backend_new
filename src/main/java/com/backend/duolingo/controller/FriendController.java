@@ -1,6 +1,6 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.FriendDTO;
+import com.backend.duolingo.dto.user.FriendDTO;
 import com.backend.duolingo.model.Friendship;
 import com.backend.duolingo.model.User;
 import com.backend.duolingo.repository.FriendshipRepository;

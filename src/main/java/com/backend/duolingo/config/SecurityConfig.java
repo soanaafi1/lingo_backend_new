@@ -30,15 +30,15 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(handling -> handling
-                        .authenticationEntryPoint((_, response, _) -> {
+                        .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json");
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Full authentication required\"}");
+                            response.getWriter().write("{\"message\":\"Authentication required\"}");
                         })
-                        .accessDeniedHandler((_, response, _) -> {
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setContentType("application/json");
                             response.setStatus(HttpStatus.FORBIDDEN.value());
-                            response.getWriter().write("{\"status\":403,\"error\":\"Forbidden\",\"message\":\"Insufficient permissions\"}");
+                            response.getWriter().write("{\"message\":\"Insufficient permissions\"}");
                         })
                 )
                 .authorizeHttpRequests(auth -> auth

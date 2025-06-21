@@ -1,18 +1,14 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.CourseDTO;
-import com.backend.duolingo.dto.CreateCourseRequest;
-import com.backend.duolingo.dto.GetAllCoursesResponse;
-import com.backend.duolingo.model.Course;
+import com.backend.duolingo.dto.course.CourseDTO;
+import com.backend.duolingo.dto.course.GetAllCoursesResponse;
 import com.backend.duolingo.service.CourseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/courses")

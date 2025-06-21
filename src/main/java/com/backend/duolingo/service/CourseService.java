@@ -1,6 +1,10 @@
 package com.backend.duolingo.service;
 
-import com.backend.duolingo.dto.*;
+import com.backend.duolingo.dto.course.CourseDTO;
+import com.backend.duolingo.dto.course.CreateCourseRequest;
+import com.backend.duolingo.dto.course.GetAllCoursesResponse;
+import com.backend.duolingo.dto.exercise.ExerciseDTO;
+import com.backend.duolingo.dto.lesson.LessonDTO;
 import com.backend.duolingo.exception.*;
 import com.backend.duolingo.model.*;
 import com.backend.duolingo.repository.CourseRepository;
@@ -35,7 +39,7 @@ public class CourseService {
     public CourseDTO getCourseWithLessons(UUID courseId) {
         try {
             Course course = courseRepository.findByIdWithLessons(courseId)
-                    .orElseThrow(() -> new NotFoundException(Course.class, courseId));
+                    .orElseThrow(() -> new NotFoundException("Course not found"));
             return convertToDTO(course);
         } catch (DataAccessException ex) {
             throw new InternalServerErrorException("Failed to retrieve course details", ex.getMessage());
@@ -129,8 +133,6 @@ public class CourseService {
         return LessonDTO.builder()
                 .id(lesson.getId())
                 .title(lesson.getTitle())
-                .order(lesson.getOrder())
-                .iconUrl(lesson.getIconUrl())
                 .xpReward(lesson.getXpReward())
                 .exercises(lesson.getExercises() != null ? lesson.getExercises().stream()
                         .map(this::convertToDTO)

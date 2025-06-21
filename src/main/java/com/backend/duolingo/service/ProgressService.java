@@ -1,6 +1,6 @@
 package com.backend.duolingo.service;
 
-import com.backend.duolingo.dto.LessonProgress;
+import com.backend.duolingo.dto.progress.LessonProgress;
 import com.backend.duolingo.model.Exercise;
 import com.backend.duolingo.model.User;
 import com.backend.duolingo.model.UserProgress;

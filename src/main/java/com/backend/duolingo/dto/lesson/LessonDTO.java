@@ -1,5 +1,6 @@
-package com.backend.duolingo.dto;
+package com.backend.duolingo.dto.lesson;
 
+import com.backend.duolingo.dto.exercise.ExerciseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,8 +16,6 @@ import java.util.UUID;
 public class LessonDTO {
     private UUID id;
     private String title;
-    private int order;
-    private String iconUrl;
     private int xpReward;
     private List<ExerciseDTO> exercises;
 }

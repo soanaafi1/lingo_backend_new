@@ -1,4 +1,4 @@
-package com.backend.duolingo.dto;
+package com.backend.duolingo.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
