@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/streak")
@@ -81,7 +82,7 @@ public class StreakController {
     
     private User getUserFromToken(String token) {
         String jwt = token.substring(7);
-        String username = jwtUtils.extractUsername(jwt);
-        return (User) userDetailsService.loadUserByUsername(username);
+        UUID userId = jwtUtils.getUserIdFromToken(jwt);
+        return (User) userDetailsService.loadUserById(userId);
     }
 }

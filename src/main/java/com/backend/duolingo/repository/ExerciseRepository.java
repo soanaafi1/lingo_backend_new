@@ -8,4 +8,7 @@ import java.util.UUID;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
     List<Exercise> findByLessonId(UUID lessonId);
+
+    boolean existsByQuestionAndLessonId(String question, UUID id);
+
 }

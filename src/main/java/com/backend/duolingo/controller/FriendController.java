@@ -218,8 +218,8 @@ public class FriendController {
     
     private User getUserFromToken(String token) {
         String jwt = token.substring(7);
-        String username = jwtUtils.extractUsername(jwt);
-        return (User) userDetailsService.loadUserByUsername(username);
+        UUID userId = jwtUtils.getUserIdFromToken(jwt);
+        return (User) userDetailsService.loadUserById(userId);
     }
     
     private FriendDTO mapToFriendDTO(Friendship friendship, User currentUser) {

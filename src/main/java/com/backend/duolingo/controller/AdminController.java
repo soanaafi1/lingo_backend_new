@@ -1,22 +1,15 @@
 package com.backend.duolingo.controller;
 
-import com.backend.duolingo.dto.CourseDTO;
-import com.backend.duolingo.dto.ExerciseDTO;
-import com.backend.duolingo.dto.LessonDTO;
-import com.backend.duolingo.model.Course;
-import com.backend.duolingo.model.Exercise;
-import com.backend.duolingo.model.Lesson;
-import com.backend.duolingo.model.Role;
-import com.backend.duolingo.model.User;
-import com.backend.duolingo.model.TranslationExercise;
-import com.backend.duolingo.model.MultipleChoiceExercise;
-import com.backend.duolingo.model.MatchingExercise;
+import com.backend.duolingo.dto.*;
+import com.backend.duolingo.exception.*;
+import com.backend.duolingo.model.*;
 import com.backend.duolingo.repository.UserRepository;
+import com.backend.duolingo.service.AppStatsService;
 import com.backend.duolingo.service.CourseService;
 import com.backend.duolingo.service.ExerciseService;
 import com.backend.duolingo.service.LessonService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,178 +31,172 @@ public class AdminController {
 
     // Course management endpoints
     @GetMapping("/courses")
-    public ResponseEntity<List<CourseDTO>> getAllCourses() {
-        return ResponseEntity.ok(courseService.getAllCourses());
+    public ResponseEntity<List<GetAllCoursesResponse>> getAllCourses() {
+        try {
+            return ResponseEntity.ok(courseService.getAllCourses());
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to retrieve courses", ex.getMessage());
+        }
     }
 
     @GetMapping("/courses/{id}")
     public ResponseEntity<CourseDTO> getCourseById(@PathVariable UUID id) {
-        return ResponseEntity.ok(courseService.getCourseWithLessons(id));
+        try {
+            return ResponseEntity.ok(courseService.getCourseWithLessons(id));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to retrieve course", ex.getMessage());
+        }
     }
 
     @PostMapping("/courses")
-    public ResponseEntity<CourseDTO> createCourse(@RequestBody Course course) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(courseService.createCourse(course));
+    public ResponseEntity<String> createCourse(@RequestBody CreateCourseRequest request) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(courseService.createCourse(request));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to create course", ex.getMessage());
+        }
     }
 
     @PutMapping("/courses/{id}")
     public ResponseEntity<CourseDTO> updateCourse(@PathVariable UUID id, @RequestBody Course course) {
-        course.setId(id);
-        return ResponseEntity.ok(courseService.updateCourse(course));
+        try {
+            course.setId(id);
+            return ResponseEntity.ok(courseService.updateCourse(course));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to update course", ex.getMessage());
+        }
     }
 
     @DeleteMapping("/courses/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
-        courseService.deleteCourse(id);
-        return ResponseEntity.noContent().build();
+        try {
+            courseService.deleteCourse(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to delete course", ex.getMessage());
+        }
     }
 
     // Lesson management endpoints
     @GetMapping("/lessons/course/{courseId}")
     public ResponseEntity<List<LessonDTO>> getLessonsByCourse(@PathVariable UUID courseId) {
-        return ResponseEntity.ok(lessonService.getLessonsByCourse(courseId));
+        try {
+            return ResponseEntity.ok(lessonService.getLessonsByCourse(courseId));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to retrieve lessons", ex.getMessage());
+        }
     }
 
     @PostMapping("/lessons/course/{courseId}")
     public ResponseEntity<LessonDTO> createLesson(@PathVariable UUID courseId, @RequestBody Lesson lesson) {
-        Lesson createdLesson = lessonService.createLesson(courseId, lesson);
-        LessonDTO lessonDTO = lessonService.convertToDTO(createdLesson);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(lessonDTO);
+        try {
+            Lesson createdLesson = lessonService.createLesson(courseId, lesson);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(lessonService.convertToDTO(createdLesson));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to create lesson", ex.getMessage());
+        }
     }
 
     @PutMapping("/lessons/{id}")
     public ResponseEntity<LessonDTO> updateLesson(@PathVariable UUID id, @RequestBody Lesson lesson) {
-        lesson.setId(id);
-        Lesson updatedLesson = lessonService.updateLesson(lesson);
-        LessonDTO lessonDTO = lessonService.convertToDTO(updatedLesson);
-        return ResponseEntity.ok(lessonDTO);
+        try {
+            lesson.setId(id);
+            Lesson updatedLesson = lessonService.updateLesson(lesson);
+            return ResponseEntity.ok(lessonService.convertToDTO(updatedLesson));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to update lesson", ex.getMessage());
+        }
     }
 
     @DeleteMapping("/lessons/{id}")
     public ResponseEntity<Void> deleteLesson(@PathVariable UUID id) {
-        lessonService.deleteLesson(id);
-        return ResponseEntity.noContent().build();
+        try {
+            lessonService.deleteLesson(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to delete lesson", ex.getMessage());
+        }
     }
 
     // Exercise management endpoints
     @GetMapping("/exercises/lesson/{lessonId}")
     public ResponseEntity<List<ExerciseDTO>> getExercisesByLesson(@PathVariable UUID lessonId) {
-        List<Exercise> exercises = exerciseService.getExercisesByLesson(lessonId);
-        List<ExerciseDTO> exerciseDTOs = exercises.stream()
-                .map(ExerciseController::getExerciseDTO)
-                .collect(java.util.stream.Collectors.toList());
-        return ResponseEntity.ok(exerciseDTOs);
+        try {
+            List<Exercise> exercises = exerciseService.getExercisesByLesson(lessonId);
+            return ResponseEntity.ok(exercises.stream()
+                    .map(ExerciseController::getExerciseDTO)
+                    .collect(java.util.stream.Collectors.toList()));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to retrieve exercises", ex.getMessage());
+        }
     }
 
     @PostMapping("/exercises/lesson/{lessonId}")
     public ResponseEntity<ExerciseDTO> createExercise(@PathVariable UUID lessonId, @RequestBody ExerciseDTO exerciseDTO) {
-        Exercise exercise = convertToExercise(exerciseDTO);
-        Exercise savedExercise = exerciseService.createExercise(lessonId, exercise);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ExerciseController.getExerciseDTO(savedExercise));
+        try {
+            Exercise exercise = convertToExercise(exerciseDTO);
+            Exercise savedExercise = exerciseService.createExercise(lessonId, exercise);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ExerciseController.getExerciseDTO(savedExercise));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to create exercise", ex.getMessage());
+        }
     }
 
     @PutMapping("/exercises/{id}")
     public ResponseEntity<ExerciseDTO> updateExercise(@PathVariable UUID id, @RequestBody ExerciseDTO exerciseDTO) {
-        Exercise exercise = convertToExercise(exerciseDTO);
-        exercise.setId(id);
-        Exercise updatedExercise = exerciseService.updateExercise(exercise);
-        return ResponseEntity.ok(ExerciseController.getExerciseDTO(updatedExercise));
-    }
-
-    private Exercise convertToExercise(ExerciseDTO dto) {
-        return getExercise(dto);
-    }
-
-    static Exercise getExercise(ExerciseDTO dto) {
-        if (dto.getType() == null) {
-            throw new IllegalArgumentException("Exercise type cannot be null. Please specify a valid type (translation, multiple_choice, or matching).");
+        try {
+            Exercise exercise = convertToExercise(exerciseDTO);
+            exercise.setId(id);
+            Exercise updatedExercise = exerciseService.updateExercise(exercise);
+            return ResponseEntity.ok(ExerciseController.getExerciseDTO(updatedExercise));
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to update exercise", ex.getMessage());
         }
-
-        return switch (dto.getType()) {
-            case "translation" -> {
-                    TranslationExercise exercise = TranslationExercise.builder()
-                        .id(dto.getId())
-                        .question(dto.getQuestion())
-                        .hint(dto.getHint())
-                        .exerciseOrder(dto.getOrder())
-                        .xpReward(dto.getXpReward())
-                        .heartsCost(dto.getHeartsCost())
-                        .correctAnswer(dto.getCorrectAnswer())
-                        .build();
-
-                    // Set a default value for correctOptionIndex to satisfy not-null constraint
-                    exercise.setCorrectOptionIndex(0);
-
-                    yield exercise;
-                }
-            case "multiple_choice" -> {
-                    List<String> options = dto.getOptions();
-                    int correctIndex = dto.getCorrectOptionIndex();
-                    String correctAnswer = (options != null && correctIndex >= 0 && correctIndex < options.size())
-                        ? options.get(correctIndex)
-                        : "No correct answer";
-
-                    yield MultipleChoiceExercise.builder()
-                        .id(dto.getId())
-                        .question(dto.getQuestion())
-                        .hint(dto.getHint())
-                        .exerciseOrder(dto.getOrder())
-                        .xpReward(dto.getXpReward())
-                        .heartsCost(dto.getHeartsCost())
-                        .options(options)
-                        .correctOptionIndex(correctIndex)
-                        .correctAnswer(correctAnswer)
-                        .build();
-                }
-            case "matching" -> {
-                    Map<String, String> pairs = dto.getPairs();
-                    // Create a string representation of the pairs map
-                    String correctAnswer = pairs != null ?
-                        pairs.entrySet().stream()
-                            .map(entry -> entry.getKey() + ":" + entry.getValue())
-                            .collect(java.util.stream.Collectors.joining(","))
-                        : "No pairs";
-
-                    yield MatchingExercise.builder()
-                        .id(dto.getId())
-                        .question(dto.getQuestion())
-                        .hint(dto.getHint())
-                        .exerciseOrder(dto.getOrder())
-                        .xpReward(dto.getXpReward())
-                        .heartsCost(dto.getHeartsCost())
-                        .pairs(pairs)
-                        .correctAnswer(correctAnswer)
-                        .build();
-                }
-            default -> throw new IllegalArgumentException("Unknown exercise type: " + dto.getType());
-        };
-    }
-
-    @GetMapping("/exercises/{id}")
-    public ResponseEntity<ExerciseDTO> getExerciseById(@PathVariable UUID id) {
-        Exercise exercise = exerciseService.getExerciseById(id);
-        return ResponseEntity.ok(ExerciseController.getExerciseDTO(exercise));
     }
 
     @DeleteMapping("/exercises/{id}")
     public ResponseEntity<Void> deleteExercise(@PathVariable UUID id) {
-        exerciseService.deleteExercise(id);
-        return ResponseEntity.noContent().build();
+        try {
+            exerciseService.deleteExercise(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to delete exercise", ex.getMessage());
+        }
     }
 
     // User management endpoints
     @PostMapping("/users/make-admin")
     public ResponseEntity<String> createAdminUser(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
+        try {
+            String email = request.get("email");
+            if (email == null || email.isBlank()) {
+                throw new BadRequestException("Email is required");
+            }
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
 
-        user.setRole(Role.ADMIN);
-        userRepository.save(user);
+            if (user.getRole() == Role.ADMIN) {
+                throw new ConflictException("User is already an admin");
+            }
 
-        return ResponseEntity.ok("User promoted to admin successfully");
+            user.setRole(Role.ADMIN);
+            userRepository.save(user);
+
+            return ResponseEntity.ok("User promoted to admin successfully");
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to update user role", ex.getMessage());
+        }
+    }
+
+    private Exercise convertToExercise(ExerciseDTO dto) {
+        try {
+            return ExerciseController.getExercise(dto);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException(ex.getMessage());
+        }
     }
 }

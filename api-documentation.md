@@ -25,7 +25,7 @@ This document provides a comprehensive guide to all API endpoints available in t
 **Request:**
 ```json
 {
-  "username": "testuser",
+  "emmail": "user@email.com",
   "password": "password123"
 }
 ```
@@ -160,38 +160,6 @@ This document provides a comprehensive guide to all API endpoints available in t
 }
 ```
 
-### Create Course
-
-**Endpoint:** `POST /api/courses`
-
-**Description:** Creates a new course.
-
-**Request:**
-```json
-{
-  "name": "German for English Speakers",
-  "description": "Learn German from English",
-  "sourceLanguage": "English",
-  "targetLanguage": "German",
-  "difficulty": "BEGINNER",
-  "imageUrl": "https://example.com/german.jpg"
-}
-```
-
-**Response:**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440003",
-  "name": "German for English Speakers",
-  "description": "Learn German from English",
-  "sourceLanguage": "English",
-  "targetLanguage": "German",
-  "difficulty": "BEGINNER",
-  "imageUrl": "https://example.com/german.jpg",
-  "lessons": []
-}
-```
-
 ### Get Courses by Language
 
 **Endpoint:** `GET /api/courses/language/{language}`
@@ -218,7 +186,7 @@ This document provides a comprehensive guide to all API endpoints available in t
 
 ### Get Lessons by Course
 
-**Endpoint:** `GET /api/lessons/course/{courseId}`
+**Endpoint:** `GET /api/lessons/{courseId}`
 
 **Description:** Returns all lessons for a specific course.
 
@@ -238,31 +206,6 @@ This document provides a comprehensive guide to all API endpoints available in t
     "order": 2
   }
 ]
-```
-
-### Create Lesson
-
-**Endpoint:** `POST /api/lessons/course/{courseId}`
-
-**Description:** Creates a new lesson for a specific course.
-
-**Request:**
-```json
-{
-  "name": "Basics 3",
-  "description": "Advanced basic Spanish phrases",
-  "order": 3
-}
-```
-
-**Response:**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440004",
-  "name": "Basics 3",
-  "description": "Advanced basic Spanish phrases",
-  "order": 3
-}
 ```
 
 ## Exercises

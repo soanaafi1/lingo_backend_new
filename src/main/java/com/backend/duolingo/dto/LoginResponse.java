@@ -10,14 +10,9 @@ import java.util.UUID;
 @Data
 @Builder
 public class LoginResponse {
-    private String token;
     private UUID id;
-    private String fullName;
-    private String email;
-    private int xpPoints;
-    private int streak;
-    private int hearts;
+    private String accessToken;
+    private String refreshToken;
     private Role role;
     private List<String> authorities;
-    private String avatarUrl;
 }

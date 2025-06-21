@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/leaderboard")
@@ -24,12 +23,6 @@ public class LeaderboardController {
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceImpl userDetailsService;
 
-    /**
-     * Get the global leaderboard
-     * @param token JWT token for authentication
-     * @param limit Number of users to return (default 10)
-     * @return List of leaderboard entries
-     */
     @GetMapping
     public ResponseEntity<List<LeaderboardEntryDTO>> getLeaderboard(
             @RequestHeader("Authorization") String token,
@@ -59,13 +52,7 @@ public class LeaderboardController {
         
         return ResponseEntity.ok(leaderboard);
     }
-    
-    /**
-     * Get the user's position in the leaderboard
-     * @param token JWT token for authentication
-     * @param range Number of users to return above and below the current user (default 5)
-     * @return List of leaderboard entries centered around the current user
-     */
+
     @GetMapping("/me")
     public ResponseEntity<List<LeaderboardEntryDTO>> getUserLeaderboardPosition(
             @RequestHeader("Authorization") String token,
@@ -118,7 +105,7 @@ public class LeaderboardController {
     
     private User getUserFromToken(String token) {
         String jwt = token.substring(7);
-        String username = jwtUtils.extractUsername(jwt);
-        return (User) userDetailsService.loadUserByUsername(username);
+        UUID userId = jwtUtils.getUserIdFromToken(jwt);
+        return (User) userDetailsService.loadUserById(userId);
     }
 }

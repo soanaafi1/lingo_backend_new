@@ -62,9 +62,7 @@ public class ProgressController {
 
     private UUID getUserIdFromToken(String token) {
         String jwt = token.substring(7);
-        String username = jwtUtils.extractUsername(jwt);
-        User user = (User) userDetailsService.loadUserByUsername(username);
-        return user.getId();
+        return jwtUtils.getUserIdFromToken(jwt);
     }
 
     private UserProgressResponse mapToResponse(UserProgress progress) {

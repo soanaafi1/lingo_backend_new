@@ -16,6 +16,8 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     @Query("SELECT DISTINCT c FROM Course c LEFT JOIN FETCH c.lessons")
     List<Course> findAllWithLessons();
 
-    List<Course> findByLanguage(String language);
-    List<Course> findByBaseCourseIsNull();
+    @Query("SELECT DISTINCT c FROM Course c")
+    List<Course> findAllWithoutLessons();
+
+    boolean existsByName(String name);
 }

@@ -33,9 +33,11 @@ public class Course {
     private String name;
 
     @Column(nullable = false)
-    private String language;
+    private Language sourceLanguage;
 
-    private String iconUrl;
+    @Column(nullable = false)
+    private Language targetLanguage;
+
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -50,6 +52,4 @@ public class Course {
     @JoinColumn(name = "base_course_id")
     @JsonIgnoreProperties({"lessons", "baseCourse"})
     private Course baseCourse;
-
-    private int totalXP;
 }

@@ -1,10 +1,8 @@
 package com.backend.duolingo.controller;
 
 import com.backend.duolingo.dto.LessonDTO;
-import com.backend.duolingo.model.Lesson;
 import com.backend.duolingo.service.LessonService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,18 +15,8 @@ import java.util.UUID;
 public class LessonController {
     private final LessonService lessonService;
 
-    @GetMapping("/course/{courseId}")
+    @GetMapping("/{courseId}")
     public ResponseEntity<List<LessonDTO>> getLessonsByCourse(@PathVariable UUID courseId) {
         return ResponseEntity.ok(lessonService.getLessonsByCourse(courseId));
-    }
-
-    @PostMapping("/course/{courseId}")
-    public ResponseEntity<LessonDTO> createLesson(
-            @PathVariable UUID courseId,
-            @RequestBody Lesson lesson) {
-        Lesson createdLesson = lessonService.createLesson(courseId, lesson);
-        LessonDTO lessonDTO = lessonService.convertToDTO(createdLesson);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(lessonDTO);
     }
 }
