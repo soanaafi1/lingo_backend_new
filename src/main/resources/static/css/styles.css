@@ -137,7 +137,7 @@ body {
 }
 
 /* Responsive adjustments */
-@media (max-width: 767.98px) {
+@media (max-width: 768px) {
     .sidebar {
         position: static;
         height: auto;

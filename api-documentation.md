@@ -31,18 +31,16 @@ This document provides a comprehensive guide to all API endpoints available in t
 ```
 
 **Response:**
+Access token expires in 24 hours and refresh token in 7 days, unless used (refresh token) or revoked (access token) before then
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "username": "testuser",
-  "email": "test@example.com",
-  "xpPoints": 150,
-  "streak": 5,
-  "hearts": 5,
-  "role": "USER",
-  "authorities": ["USER"],
-  "avatarUrl": "https://ui-avatars.com/api/?name=testuser"
+  "id": "user_id",
+  "accessToken": "access_token",
+  "refreshToken": "refresh_token",
+  "role": "ADMIN",
+  "authorities": [
+    "ADMIN"
+  ]
 }
 ```
 
@@ -59,10 +57,10 @@ This document provides a comprehensive guide to all API endpoints available in t
   "email": "user@example.com",
   "password": "securePassword123",
   "language": {
-    "SPANISH": "BEGINNER",
-    "FRENCH": "INTERMEDIATE"
+    "SPANISH": "BEGINNER"
   },
-  "age": 30
+  "age": 30,
+  "role": "USER"
 }
 ```
 

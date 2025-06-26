@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.backend</groupId>
-    <artifactId>duolingo</artifactId>
+    <artifactId>pandylingo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>duolingo</name>
     <description>duolingo</description>
