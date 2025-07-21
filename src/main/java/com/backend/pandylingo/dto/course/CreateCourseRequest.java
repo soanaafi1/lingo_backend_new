@@ -11,6 +11,4 @@ public class CreateCourseRequest {
     private Language targetLanguage;
     private String description;
     private Difficulty difficulty;
-
-
 }

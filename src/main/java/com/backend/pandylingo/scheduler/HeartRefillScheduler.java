@@ -1,9 +1,7 @@
 package com.backend.pandylingo.scheduler;
 
-import com.backend.pandylingo.model.User;
 import com.backend.pandylingo.model.UserProfile;
 import com.backend.pandylingo.repository.UserProfileRepository;
-import com.backend.pandylingo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,7 +20,7 @@ public class HeartRefillScheduler {
     public void refillHearts() {
         List<UserProfile> users = userProfileRepository.findByHeartsLessThan(5);
 
-        for (UserProfile user : users) {
+        for (UserProfile user: users) {
             if (user.getLastHeartRefill() == null ||
                     user.getLastHeartRefill().isBefore(LocalDateTime.now().minusHours(5))) {
 

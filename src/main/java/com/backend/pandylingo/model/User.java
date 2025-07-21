@@ -11,15 +11,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "users")
 public class User implements UserDetails {
     @Id
-    @Column(columnDefinition = "UUID")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 

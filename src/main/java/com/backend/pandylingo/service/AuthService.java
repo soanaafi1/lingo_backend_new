@@ -84,7 +84,10 @@ public class AuthService {
             // Create new user
             User user = buildNewUser(request);
             userRepository.save(user);
-            appStatsService.incrementUsersCount();
+
+            if (user.getRole() == Role.USER) {
+                appStatsService.incrementUsersCount();
+            }
 
             return "User registered successfully";
 
@@ -107,7 +110,10 @@ public class AuthService {
             String newAccessToken = jwtUtils.generateAccessToken(userDetails);
             String newRefreshToken = jwtUtils.generateRefreshToken(userDetails);
 
-            return new TokenRefreshResponse(newAccessToken, newRefreshToken);
+            return TokenRefreshResponse.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
 
         } catch (ExpiredJwtException ex) {
             throw new UnauthenticatedException("Refresh token expired");

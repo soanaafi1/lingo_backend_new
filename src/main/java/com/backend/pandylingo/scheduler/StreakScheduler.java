@@ -1,9 +1,7 @@
 package com.backend.pandylingo.scheduler;
 
-import com.backend.pandylingo.model.User;
 import com.backend.pandylingo.model.UserProfile;
 import com.backend.pandylingo.repository.UserProfileRepository;
-import com.backend.pandylingo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,7 +13,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StreakScheduler {
-    private final UserRepository userRepository;
 
     private final UserProfileRepository userProfileRepository;
 
@@ -25,7 +22,7 @@ public class StreakScheduler {
      * - If a user hasn't practiced today but has a streak freeze, use the freeze and maintain streak
      * - If a user hasn't practiced and has no streak freeze, reset streak to 0
      */
-    @Scheduled(cron = "0 0 0 * * ?") // Run at midnight every day
+    @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void updateStreaks() {
         LocalDate today = LocalDate.now();
