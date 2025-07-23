@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +34,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final AppStatsService appStatsService;
+
+    private final Logger logger = Logger.getLogger(this.getClass().getName());;
 
     @Transactional
     public LoginResponse loginUser(LoginRequest request) {

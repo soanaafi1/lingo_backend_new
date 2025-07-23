@@ -17,14 +17,6 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, UUID
     // Find progress for a specific user and exercise
     Optional<UserProgress> findByUserIdAndExerciseId(UUID userId, UUID exerciseId);
 
-    // Find all completed exercises for a user in a course
-    @Query("SELECT up FROM UserProgress up " +
-            "WHERE up.user.id = :userId " +
-            "AND up.exercise.lesson.course.id = :courseId " +
-            "AND up.completed = true")
-    List<UserProgress> findCompletedExercisesByUserAndCourse(
-            @Param("userId") UUID userId,
-            @Param("courseId") UUID courseId);
 
     // Count how many exercises a user has completed in a lesson
     @Query("SELECT COUNT(up) FROM UserProgress up " +

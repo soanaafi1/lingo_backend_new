@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
+@Data
 public class LoginResponse {
     private UUID userId;
     private String accessToken;

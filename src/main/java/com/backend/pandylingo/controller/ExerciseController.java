@@ -21,10 +21,10 @@ import java.util.UUID;;
 public class ExerciseController {
     private final ExerciseService exerciseService;
 
-    @GetMapping("/lesson/{lessonId}")
-    public ResponseEntity<List<ExerciseDTO>> getExercisesByLesson(@PathVariable UUID lessonId) {
+    @GetMapping
+    public ResponseEntity<List<ExerciseDTO>> getExercisesByLessonId(UUID lessonId) {
         try {
-            List<Exercise> exercises = exerciseService.getExercisesByLesson(lessonId);
+            List<Exercise> exercises = exerciseService.getExercisesByLessonId(lessonId);
             List<ExerciseDTO> exerciseDTOs = exercises.stream()
                     .map(ExerciseController::getExerciseDTO)
                     .collect(java.util.stream.Collectors.toList());
@@ -39,13 +39,12 @@ public class ExerciseController {
                 .id(exercise.getId())
                 .question(exercise.getQuestion())
                 .hint(exercise.getHint())
-                .order(exercise.getExerciseOrder())
                 .xpReward(exercise.getXpReward())
                 .heartsCost(exercise.getHeartsCost())
                 .correctAnswer(exercise.getCorrectAnswer());
 
         switch (exercise) {
-            case TranslationExercise translationExercise -> builder.type("translation");
+            case TranslationExercise _ -> builder.type("translation");
             case MultipleChoiceExercise multipleChoiceExercise -> builder.type("multiple_choice")
                     .options(multipleChoiceExercise.getOptions())
                     .correctOptionIndex(multipleChoiceExercise.getCorrectOptionIndex());
@@ -69,7 +68,6 @@ public class ExerciseController {
                         .id(dto.getId())
                         .question(dto.getQuestion())
                         .hint(dto.getHint())
-                        .exerciseOrder(dto.getOrder())
                         .xpReward(dto.getXpReward())
                         .heartsCost(dto.getHeartsCost())
                         .correctAnswer(dto.getCorrectAnswer())
@@ -88,7 +86,6 @@ public class ExerciseController {
                         .id(dto.getId())
                         .question(dto.getQuestion())
                         .hint(dto.getHint())
-                        .exerciseOrder(dto.getOrder())
                         .xpReward(dto.getXpReward())
                         .heartsCost(dto.getHeartsCost())
                         .options(dto.getOptions())
@@ -105,7 +102,6 @@ public class ExerciseController {
                         .id(dto.getId())
                         .question(dto.getQuestion())
                         .hint(dto.getHint())
-                        .exerciseOrder(dto.getOrder())
                         .xpReward(dto.getXpReward())
                         .heartsCost(dto.getHeartsCost())
                         .pairs(dto.getPairs())

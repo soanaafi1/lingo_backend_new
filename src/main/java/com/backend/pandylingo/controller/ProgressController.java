@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class ProgressController {
     private final ProgressService progressService;
     private final JwtUtils jwtUtils;
-    private final UserDetailsServiceImpl userDetailsService;
     private final LessonService lessonService; // Needed for lesson progress. Do that later
 
     @PostMapping("/submit")

@@ -16,12 +16,6 @@ public class StreakScheduler {
 
     private final UserProfileRepository userProfileRepository;
 
-    /**
-     * Updates user streaks daily at midnight.
-     * - If a user has practiced today (lastStreakUpdate is today), their streak continues
-     * - If a user hasn't practiced today but has a streak freeze, use the freeze and maintain streak
-     * - If a user hasn't practiced and has no streak freeze, reset streak to 0
-     */
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void updateStreaks() {

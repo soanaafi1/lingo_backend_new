@@ -17,9 +17,6 @@ public class ApplicationStats {
     private String id = "GLOBAL_STATS";
 
     @Column(nullable = false, columnDefinition = "bigint default 0")
-    private Long totalCourses = 0L;
-
-    @Column(nullable = false, columnDefinition = "bigint default 0")
     private Long totalLessons = 0L;
 
     @Column(nullable = false, columnDefinition = "bigint default 0")

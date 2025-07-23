@@ -20,9 +20,6 @@ public class AppStatsService {
 
     private final AppStatsRepository statsRepo;
 
-    public void incrementCoursesCount() {
-        updateStat("totalCourses", 1L);
-    }
     public void incrementLessonsCount() {
         updateStat("totalLessons", 1L);
     }
@@ -33,9 +30,6 @@ public class AppStatsService {
         updateStat("totalUsers", 1L);
     }
 
-    public void decrementCourses() {
-        updateStat("totalCourses",-1L);
-    }
 
     public void decrementLessons() {
         updateStat("totalLessons",-1L);
@@ -64,7 +58,6 @@ public class AppStatsService {
             }
 
             return AppStatsResponse.builder()
-                    .totalCourses(stats.getTotalCourses())
                     .totalExercises(stats.getTotalExercises())
                     .totalLessons(stats.getTotalLessons())
                     .totalLearners(stats.getTotalUsers())

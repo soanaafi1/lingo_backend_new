@@ -1,19 +1,18 @@
 package com.backend.pandylingo.admin;
 
 import com.backend.pandylingo.controller.ExerciseController;
-import com.backend.pandylingo.dto.course.CourseDTO;
-import com.backend.pandylingo.dto.course.CreateCourseRequest;
-import com.backend.pandylingo.dto.course.GetAllCoursesResponse;
 import com.backend.pandylingo.dto.exercise.ExerciseDTO;
+import com.backend.pandylingo.dto.lesson.CreateLessonRequest;
 import com.backend.pandylingo.dto.lesson.LessonDTO;
 import com.backend.pandylingo.dto.stats.AppStatsResponse;
 import com.backend.pandylingo.exception.*;
 import com.backend.pandylingo.model.*;
+import com.backend.pandylingo.repository.LessonRepository;
 import com.backend.pandylingo.repository.UserRepository;
 import com.backend.pandylingo.service.AppStatsService;
-import com.backend.pandylingo.service.CourseService;
 import com.backend.pandylingo.service.ExerciseService;
 import com.backend.pandylingo.service.LessonService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -24,16 +23,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('ADMIN')")
+@Transactional
 public class AdminController {
-    private final CourseService courseService;
     private final LessonService lessonService;
     private final ExerciseService exerciseService;
     private final UserRepository userRepository;
+    private final LessonRepository lessonRepository;
     private final AppStatsService statsService;
     
     // Application Statistics getter endpoint
@@ -46,69 +47,21 @@ public class AdminController {
         }
     }
 
-    // Course management endpoints
-    @GetMapping("/courses")
-    public ResponseEntity<List<GetAllCoursesResponse>> getAllCourses() {
-        try {
-            return ResponseEntity.ok(courseService.getAllCourses());
-        } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to retrieve courses");
-        }
-    }
-
-    @GetMapping("/courses/{id}")
-    public ResponseEntity<CourseDTO> getCourseById(@PathVariable UUID id) {
-        try {
-            return ResponseEntity.ok(courseService.getCourseWithLessons(id));
-        } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to retrieve course");
-        }
-    }
-
-    @PostMapping("/courses")
-    public ResponseEntity<String> createCourse(@RequestBody CreateCourseRequest request) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(courseService.createCourse(request));
-        } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to create course");
-        }
-    }
-
-    @PutMapping("/courses/{id}")
-    public ResponseEntity<CourseDTO> updateCourse(@PathVariable UUID id, @RequestBody Course course) {
-        try {
-            course.setId(id);
-            return ResponseEntity.ok(courseService.updateCourse(course));
-        } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to update course");
-        }
-    }
-
-    @DeleteMapping("/courses/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
-        try {
-            courseService.deleteCourse(id);
-            return ResponseEntity.noContent().build();
-        } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to delete course");
-        }
-    }
-
     // Lesson management endpoints
-    @GetMapping("/lessons/course/{courseId}")
-    public ResponseEntity<List<LessonDTO>> getLessonsByCourse(@PathVariable UUID courseId) {
+    @GetMapping("/lessons")
+    public ResponseEntity<List<LessonDTO>> getLessonsByLanguageAndDifficulty(Language language, Difficulty difficulty) {
         try {
-            return ResponseEntity.ok(lessonService.getLessonsByCourse(courseId));
+            return ResponseEntity.ok(lessonService.getLessonsByLanguageAndDifficulty(language, difficulty));
         } catch (DataAccessException ex) {
             throw new InternalServerErrorException("Failed to retrieve lessons");
         }
     }
 
-    @PostMapping("/lessons/course/{courseId}")
-    public ResponseEntity<LessonDTO> createLesson(@PathVariable UUID courseId, @RequestBody Lesson lesson) {
+    @PostMapping("/lesson")
+    public ResponseEntity<LessonDTO> createLesson(@RequestBody CreateLessonRequest request) {
+        Logger logger = Logger.getLogger(this.getClass().getName());
         try {
-            Lesson createdLesson = lessonService.createLesson(courseId, lesson);
+            Lesson createdLesson = lessonService.createLesson(request);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(lessonService.convertToDTO(createdLesson));
         } catch (DataAccessException ex) {
@@ -141,7 +94,7 @@ public class AdminController {
     @GetMapping("/exercises/lesson/{lessonId}")
     public ResponseEntity<List<ExerciseDTO>> getExercisesByLesson(@PathVariable UUID lessonId) {
         try {
-            List<Exercise> exercises = exerciseService.getExercisesByLesson(lessonId);
+            List<Exercise> exercises = exerciseService.getExercisesByLessonId(lessonId);
             return ResponseEntity.ok(exercises.stream()
                     .map(ExerciseController::getExerciseDTO)
                     .collect(java.util.stream.Collectors.toList()));
@@ -150,8 +103,8 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/exercises/lesson/{lessonId}")
-    public ResponseEntity<ExerciseDTO> createExercise(@PathVariable UUID lessonId, @RequestBody ExerciseDTO exerciseDTO) {
+    @PostMapping("/exercise")
+    public ResponseEntity<ExerciseDTO> createExercise(UUID lessonId, @RequestBody ExerciseDTO exerciseDTO) {
         try {
             Exercise exercise = convertToExercise(exerciseDTO);
             Exercise savedExercise = exerciseService.createExercise(lessonId, exercise);
