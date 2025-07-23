@@ -120,7 +120,7 @@ public class AdminController {
         try {
             Exercise exercise = convertToExercise(exerciseDTO);
             exercise.setId(id);
-            Exercise updatedExercise = exerciseService.updateExercise(exercise);
+            Exercise updatedExercise = exerciseService.updateExercise(id, exercise);
             return ResponseEntity.ok(ExerciseController.getExerciseDTO(updatedExercise));
         } catch (DataAccessException ex) {
             throw new InternalServerErrorException("Failed to update exercise");
@@ -164,7 +164,7 @@ public class AdminController {
 
     private Exercise convertToExercise(ExerciseDTO dto) {
         try {
-            return ExerciseController.getExercise(dto);
+            return ExerciseController.getExerciseFromDTO(dto);
         } catch (IllegalArgumentException ex) {
             throw new BadRequestException(ex.getMessage());
         }

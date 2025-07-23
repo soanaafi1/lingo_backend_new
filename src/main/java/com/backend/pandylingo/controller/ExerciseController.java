@@ -13,7 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/exercises")
@@ -22,18 +23,19 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
 
     @GetMapping
-    public ResponseEntity<List<ExerciseDTO>> getExercisesByLessonId(UUID lessonId) {
+    public ResponseEntity<List<ExerciseDTO>> getExercisesByLessonId(@RequestParam UUID lessonId) {
         try {
             List<Exercise> exercises = exerciseService.getExercisesByLessonId(lessonId);
             List<ExerciseDTO> exerciseDTOs = exercises.stream()
                     .map(ExerciseController::getExerciseDTO)
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(exerciseDTOs);
         } catch (DataAccessException ex) {
             throw new InternalServerErrorException("Failed to retrieve exercises");
         }
     }
 
+    // Converts an Exercise entity to an ExerciseDTO
     public static ExerciseDTO getExerciseDTO(Exercise exercise) {
         ExerciseDTO.ExerciseDTOBuilder builder = ExerciseDTO.builder()
                 .id(exercise.getId())
@@ -45,73 +47,66 @@ public class ExerciseController {
 
         switch (exercise) {
             case TranslationExercise _ -> builder.type("translation");
-            case MultipleChoiceExercise multipleChoiceExercise -> builder.type("multiple_choice")
-                    .options(multipleChoiceExercise.getOptions())
-                    .correctOptionIndex(multipleChoiceExercise.getCorrectOptionIndex());
-            case MatchingExercise matchingExercise -> builder.type("matching")
-                    .pairs(matchingExercise.getPairs());
-            default -> {
-            }
+            case MultipleChoiceExercise mce -> builder.type("multiple_choice")
+                    .options(mce.getOptions());
+            case MatchingExercise me -> builder.type("matching")
+                    .pairs(me.getPairs());
+            default -> throw new IllegalStateException("Unknown exercise type: " + exercise.getClass().getSimpleName());
         }
 
         return builder.build();
     }
 
-    public static Exercise getExercise(ExerciseDTO dto) {
+    // Converts an ExerciseDTO to an Exercise entity
+    public static Exercise getExerciseFromDTO(ExerciseDTO dto) {
         if (dto.getType() == null) {
             throw new IllegalArgumentException("Exercise type is required");
         }
+        if (dto.getCorrectAnswer() == null || dto.getCorrectAnswer().isBlank()) {
+            throw new IllegalArgumentException("Correct answer is required for all exercise types");
+        }
 
-        switch (dto.getType().toLowerCase()) {
-            case "translation":
-                return TranslationExercise.builder()
-                        .id(dto.getId())
-                        .question(dto.getQuestion())
-                        .hint(dto.getHint())
-                        .xpReward(dto.getXpReward())
-                        .heartsCost(dto.getHeartsCost())
-                        .correctAnswer(dto.getCorrectAnswer())
-                        .correctOptionIndex(0) // Default value for translation exercises
-                        .build();
-
-            case "multiple_choice":
+        return switch (dto.getType().toLowerCase()) {
+            case "translation" -> TranslationExercise.builder()
+                    .id(dto.getId())
+                    .question(dto.getQuestion())
+                    .hint(dto.getHint())
+                    .xpReward(dto.getXpReward())
+                    .heartsCost(dto.getHeartsCost())
+                    .correctAnswer(dto.getCorrectAnswer())
+                    .build();
+            case "multiple_choice" -> {
                 if (dto.getOptions() == null || dto.getOptions().isEmpty()) {
                     throw new IllegalArgumentException("Options are required for multiple choice exercises");
                 }
-                if (dto.getCorrectOptionIndex() == null) {
-                    throw new IllegalArgumentException("Correct option index is required");
-                }
-
-                return MultipleChoiceExercise.builder()
+                yield MultipleChoiceExercise.builder()
                         .id(dto.getId())
                         .question(dto.getQuestion())
                         .hint(dto.getHint())
                         .xpReward(dto.getXpReward())
                         .heartsCost(dto.getHeartsCost())
                         .options(dto.getOptions())
-                        .correctOptionIndex(dto.getCorrectOptionIndex())
-                        .correctAnswer(dto.getOptions().get(dto.getCorrectOptionIndex()))
+                        .correctAnswer(dto.getCorrectAnswer()) // Use the string correct answer
                         .build();
-
-            case "matching":
+                // Correct answer for MC is now directly the string value of the correct option
+            }
+            case "matching" -> {
                 if (dto.getPairs() == null || dto.getPairs().isEmpty()) {
                     throw new IllegalArgumentException("Pairs are required for matching exercises");
                 }
-
-                return MatchingExercise.builder()
+                // For matching, correctAnswer in DTO should be the serialized string of pairs
+                yield MatchingExercise.builder()
                         .id(dto.getId())
                         .question(dto.getQuestion())
                         .hint(dto.getHint())
                         .xpReward(dto.getXpReward())
                         .heartsCost(dto.getHeartsCost())
                         .pairs(dto.getPairs())
-                        .correctAnswer(String.join(",", dto.getPairs().entrySet().stream()
-                                .map(e -> e.getKey() + ":" + e.getValue())
-                                .toList()))
+                        .correctAnswer(dto.getCorrectAnswer()) // Use the serialized string correct answer
                         .build();
-
-            default:
-                throw new IllegalArgumentException("Invalid exercise type: " + dto.getType());
-        }
+                // For matching, correctAnswer in DTO should be the serialized string of pairs
+            }
+            default -> throw new IllegalArgumentException("Invalid exercise type: " + dto.getType());
+        };
     }
 }

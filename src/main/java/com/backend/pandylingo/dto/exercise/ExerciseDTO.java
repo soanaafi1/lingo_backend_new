@@ -15,16 +15,16 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ExerciseDTO {
     private UUID id;
-    private String type;
+    private String type; // "translation", "multiple_choice", "matching"
     private String question;
     private String hint;
     private int order;
     private int xpReward;
     private int heartsCost;
 
+    private String correctAnswer;
+
     // Type-specific fields
-    private String correctAnswer;          // For translation
     private List<String> options;          // For multiple choice
-    private Integer correctOptionIndex;    // For multiple choice
     private Map<String, String> pairs;     // For matching
 }

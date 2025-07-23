@@ -1,7 +1,6 @@
 package com.backend.pandylingo.model;
 
 import jakarta.persistence.*;
-import jakarta.persistence.DiscriminatorValue;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,20 +22,11 @@ public class MultipleChoiceExercise extends Exercise {
     @Column(name = "option")
     private List<String> options = new ArrayList<>();
 
-    @Column(name = "correct_index", nullable = false)
-    private int correctOptionIndex;
-
-    public MultipleChoiceExercise() {
-
-    }
+    public MultipleChoiceExercise() {}
 
     @Override
     public boolean validateAnswer(String answer) {
-        try {
-            int selectedIndex = Integer.parseInt(answer);
-            return selectedIndex == correctOptionIndex;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        // Validation uses the inherited 'correctAnswer' field
+        return correctAnswer != null && correctAnswer.equalsIgnoreCase(answer.trim());
     }
 }

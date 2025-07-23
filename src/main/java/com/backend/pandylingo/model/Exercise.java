@@ -20,13 +20,13 @@ import java.util.UUID;
 @SuperBuilder
 @Table(name = "exercises")
 @JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "type")
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = TranslationExercise.class, name = "translation"),
-    @JsonSubTypes.Type(value = MultipleChoiceExercise.class, name = "multiple_choice"),
-    @JsonSubTypes.Type(value = MatchingExercise.class, name = "matching")
+        @JsonSubTypes.Type(value = TranslationExercise.class, name = "translation"),
+        @JsonSubTypes.Type(value = MultipleChoiceExercise.class, name = "multiple_choice"),
+        @JsonSubTypes.Type(value = MatchingExercise.class, name = "matching")
 })
 public abstract class Exercise {
     @Id
@@ -53,7 +53,7 @@ public abstract class Exercise {
     private int xpReward;
     private int heartsCost;
 
-    @Column(name = "correct_answer")
+    @Column(name = "correct_answer", nullable = false)
     protected String correctAnswer;
 
     public abstract boolean validateAnswer(String answer);
