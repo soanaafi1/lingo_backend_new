@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +34,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final AppStatsService appStatsService;
+
+    private final Logger logger = Logger.getLogger(this.getClass().getName());;
 
     @Transactional
     public LoginResponse loginUser(LoginRequest request) {
@@ -84,7 +87,10 @@ public class AuthService {
             // Create new user
             User user = buildNewUser(request);
             userRepository.save(user);
-            appStatsService.incrementUsersCount();
+
+            if (user.getRole() == Role.USER) {
+                appStatsService.incrementUsersCount();
+            }
 
             return "User registered successfully";
 
@@ -107,7 +113,10 @@ public class AuthService {
             String newAccessToken = jwtUtils.generateAccessToken(userDetails);
             String newRefreshToken = jwtUtils.generateRefreshToken(userDetails);
 
-            return new TokenRefreshResponse(newAccessToken, newRefreshToken);
+            return TokenRefreshResponse.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
 
         } catch (ExpiredJwtException ex) {
             throw new UnauthenticatedException("Refresh token expired");

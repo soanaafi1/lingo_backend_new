@@ -44,7 +44,7 @@ public class ExerciseService {
     }
 
     @Transactional(readOnly = true)
-    public List<Exercise> getExercisesByLesson(UUID lessonId) {
+    public List<Exercise> getExercisesByLessonId(UUID lessonId) {
         try {
             if (!lessonRepository.existsById(lessonId)) {
                 throw new NotFoundException(Lesson.class, lessonId);

@@ -26,4 +26,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public Optional<User> loadUserById(UUID userId) {
         return userRepository.findById(userId);
     }
+
+    public Optional<User> loadUserByIdWithProfile(UUID userId) {
+        return userRepository.findById(userId);
+    }
 }

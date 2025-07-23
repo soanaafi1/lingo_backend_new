@@ -1,5 +1,6 @@
 package com.backend.pandylingo.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,15 +12,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "users")
 public class User implements UserDetails {
     @Id
-    @Column(columnDefinition = "UUID")
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
@@ -33,6 +33,7 @@ public class User implements UserDetails {
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private UserProfile userProfile;
 
     @Enumerated(EnumType.STRING)

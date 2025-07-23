@@ -1,6 +1,8 @@
 package com.backend.pandylingo.controller;
 
+import com.backend.pandylingo.dto.friendship.AddFriendRequest;
 import com.backend.pandylingo.dto.user.FriendDTO;
+import com.backend.pandylingo.exception.NotFoundException;
 import com.backend.pandylingo.model.Friendship;
 import com.backend.pandylingo.model.User;
 import com.backend.pandylingo.repository.FriendshipRepository;
@@ -59,16 +61,22 @@ public class FriendController {
     @PostMapping("/request")
     public ResponseEntity<?> sendFriendRequest(
             @RequestHeader("Authorization") String token,
-            @RequestBody Map<String, String> request) {
+            @RequestBody AddFriendRequest request) {
         
         User currentUser = jwtUtils.getUserFromAccessToken(token);
-        String friendUsername = request.get("username");
+        UUID friendID = request.getFriendID();
         
         // Find the friend user
-        User friend = (User) userRepository.findByFullName(friendUsername);
+        Optional<User> optionalFriend = userRepository.findByIdWithoutProfile(friendID);
+
+        if (optionalFriend.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+
+        User friend = optionalFriend.get();
         
         // Check if they're already friends
-        Optional<Friendship> existingFriendship = friendshipRepository.findByUserAndFriend(currentUser, Optional.ofNullable(friend));
+        Optional<Friendship> existingFriendship = friendshipRepository.findByUserAndFriend(currentUser, Optional.of(friend));
         if (existingFriendship.isPresent()) {
             return ResponseEntity.badRequest().body("Friend request already exists");
         }
@@ -92,9 +100,7 @@ public class FriendController {
         return ResponseEntity.ok().build();
     }
     
-    /**
-     * Accept a friend request
-     */
+
     @PostMapping("/accept/{friendshipId}")
     public ResponseEntity<?> acceptFriendRequest(
             @RequestHeader("Authorization") String token,
@@ -124,9 +130,7 @@ public class FriendController {
         return ResponseEntity.ok().build();
     }
     
-    /**
-     * Reject a friend request or remove a friend
-     */
+
     @DeleteMapping("/{friendshipId}")
     public ResponseEntity<?> rejectOrRemoveFriend(
             @RequestHeader("Authorization") String token,

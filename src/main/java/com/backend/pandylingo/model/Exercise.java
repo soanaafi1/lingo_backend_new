@@ -45,9 +45,6 @@ public abstract class Exercise {
 
     private String hint;
 
-    @Column(name = "exercise_order", nullable = false)
-    private int exerciseOrder;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)
     @JsonIgnoreProperties("exercises")

@@ -4,7 +4,6 @@ import com.backend.pandylingo.dto.user.LeaderboardEntryDTO;
 import com.backend.pandylingo.model.User;
 import com.backend.pandylingo.model.UserProfile;
 import com.backend.pandylingo.repository.UserProfileRepository;
-import com.backend.pandylingo.repository.UserRepository;
 import com.backend.pandylingo.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -27,29 +26,30 @@ public class LeaderboardController {
     public ResponseEntity<List<LeaderboardEntryDTO>> getLeaderboard(
             @RequestHeader("Authorization") String token,
             @RequestParam(defaultValue = "10") int limit) {
-        
+
         User currentUser = jwtUtils.getUserFromAccessToken(token);
         UUID currentUserId = currentUser.getId();
-        
+
         // Get top users by XP
         List<UserProfile> topUsers = userProfileRepository.findAll(
                 PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "xpPoints"))
         ).getContent();
-        
+
         // Convert to DTOs with rank
         List<LeaderboardEntryDTO> leaderboard = new ArrayList<>();
         for (int i = 0; i < topUsers.size(); i++) {
-            UserProfile user = topUsers.get(i);
+            UserProfile userProfile = topUsers.get(i);
             leaderboard.add(LeaderboardEntryDTO.builder()
-                    .userId(user.getId())
-                    .fullName(user.getUser().getFullName())
-                    .xpPoints(user.getXpPoints())
-                    .streak(user.getStreak())
+                    .userId(userProfile.getUser().getId())
+                    .fullName(userProfile.getUser().getFullName())
+                    .avatarUrl(userProfile.getAvatarUrl())
+                    .xpPoints(userProfile.getXpPoints())
+                    .streak(userProfile.getStreak())
                     .rank(i + 1)
-                    .isCurrentUser(user.getId().equals(currentUserId))
+                    .isCurrentUser(userProfile.getUser().getId().equals(currentUserId))
                     .build());
         }
-        
+
         return ResponseEntity.ok(leaderboard);
     }
 

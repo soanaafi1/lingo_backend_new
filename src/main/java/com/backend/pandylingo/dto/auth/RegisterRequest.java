@@ -20,11 +20,14 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 6, max = 40)
+    @Size(min = 6)
     private String password;
 
+    @NotBlank
     private Map<Language, Difficulty> languageProficiencies;
 
+    @NotBlank
+    @Size(min = 6)
     private int age;
 
     @NotBlank

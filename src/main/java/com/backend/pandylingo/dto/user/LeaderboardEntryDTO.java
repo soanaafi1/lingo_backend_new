@@ -14,6 +14,7 @@ import java.util.UUID;
 public class LeaderboardEntryDTO {
     private UUID userId;
     private String fullName;
+    private String avatarUrl;
     private int xpPoints;
     private int streak;
     private int rank;
