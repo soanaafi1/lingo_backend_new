@@ -1,7 +1,6 @@
 package com.backend.pandylingo.model;
 
 import jakarta.persistence.*;
-import jakarta.persistence.DiscriminatorValue;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,22 +25,16 @@ public class MatchingExercise extends Exercise {
     @Column(name = "value")
     private Map<String, String> pairs = new HashMap<>();
 
-    @Builder.Default
-    @Column(name = "correct_index", nullable = false)
-    private int correctOptionIndex = 0; // Default value to satisfy not-null constraint
-
-    public MatchingExercise() {
-
-    }
+    public MatchingExercise() {}
 
     @Override
     public boolean validateAnswer(String answer) {
-        // Format: "key1:value1,key2:value2"
         Map<String, String> answerMap = parseAnswer(answer);
-        return pairs.equals(answerMap);
+        return correctAnswer != null && correctAnswer.equalsIgnoreCase(answer.trim());
     }
 
     private Map<String, String> parseAnswer(String answer) {
+        // Utility to parse the incoming answer string (e.g., "key1:value1,key2:value2") into a map
         return Arrays.stream(answer.split(","))
                 .map(pair -> pair.split(":"))
                 .filter(parts -> parts.length == 2)

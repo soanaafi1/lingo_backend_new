@@ -3,9 +3,13 @@ package com.backend.pandylingo.service;
 import com.backend.pandylingo.exception.*;
 import com.backend.pandylingo.model.Exercise;
 import com.backend.pandylingo.model.Lesson;
+import com.backend.pandylingo.model.MultipleChoiceExercise;
+import com.backend.pandylingo.model.MatchingExercise;
 import com.backend.pandylingo.repository.ExerciseRepository;
 import com.backend.pandylingo.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -14,111 +18,103 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ExerciseService {
     private final ExerciseRepository exerciseRepository;
     private final LessonRepository lessonRepository;
-    private final AppStatsService appStatsService;
+    private static final Logger logger = LoggerFactory.getLogger(ExerciseService.class);
 
     @Transactional
     public Exercise createExercise(UUID lessonId, Exercise exercise) {
         try {
             validateExercise(exercise);
             Lesson lesson = getLessonById(lessonId);
-
-            if (exerciseRepository.existsByQuestionAndLessonId(exercise.getQuestion(), lessonId)) {
-                throw new ConflictException("Exercise with this question already exists in the lesson");
-            }
-
-            exercise.setLesson(lesson);
+            exercise.setLesson(lesson); // Set the lesson relationship
             Exercise savedExercise = exerciseRepository.save(exercise);
-            appStatsService.incrementExercisesCount();
+            logger.info("Created exercise: {}", savedExercise.getId());
             return savedExercise;
         } catch (DataIntegrityViolationException ex) {
-            throw new BadRequestException("Invalid exercise data", ex.getMostSpecificCause().getMessage());
+            logger.error("Data integrity violation when creating exercise: {}", ex.getMessage());
+            throw new BadRequestException("Exercise data is invalid or conflicts with existing data.");
+        } catch (ObjectOptimisticLockingFailureException ex) {
+            logger.error("Optimistic locking failure when creating exercise: {}", ex.getMessage());
+            throw new ConflictException("Concurrent modification detected. Please try again.");
         } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to create exercise");
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<Exercise> getExercisesByLessonId(UUID lessonId) {
-        try {
-            if (!lessonRepository.existsById(lessonId)) {
-                throw new NotFoundException(Lesson.class, lessonId);
-            }
-            return exerciseRepository.findByLessonId(lessonId);
-        } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to retrieve exercises");
+            logger.error("Database access error when creating exercise: {}", ex.getMessage());
+            throw new InternalServerErrorException("Failed to create exercise due to a database error.");
         }
     }
 
     @Transactional
-    public Exercise updateExercise(Exercise exercise) {
+    public Exercise updateExercise(UUID exerciseId, Exercise updatedExercise) {
         try {
-            // Verify exercise exists and get current version
-            Exercise existing = exerciseRepository.findById(exercise.getId())
-                    .orElseThrow(() -> new NotFoundException(Exercise.class, exercise.getId()));
+            validateExercise(updatedExercise);
+            Exercise existingExercise = exerciseRepository.findById(exerciseId)
+                    .orElseThrow(() -> new NotFoundException("Exercise not found with ID: " + exerciseId));
 
-            validateExercise(exercise);
+            // Update common fields
+            existingExercise.setQuestion(updatedExercise.getQuestion());
+            existingExercise.setHint(updatedExercise.getHint());
+            existingExercise.setXpReward(updatedExercise.getXpReward());
+            existingExercise.setHeartsCost(updatedExercise.getHeartsCost());
+            existingExercise.setCorrectAnswer(updatedExercise.getCorrectAnswer()); // Update correct answer
 
-            // Check for question conflicts in the same lesson
-            if (!existing.getQuestion().equals(exercise.getQuestion())) {
-                if (exerciseRepository.existsByQuestionAndLessonId(
-                        exercise.getQuestion(),
-                        existing.getLesson().getId()
-                )) {
-                    throw new ConflictException("Exercise with this question already exists in the lesson");
-                }
+            // Handle type-specific updates
+            if (existingExercise instanceof MultipleChoiceExercise existingMCE && updatedExercise instanceof MultipleChoiceExercise updatedMCE) {
+                existingMCE.setOptions(updatedMCE.getOptions());
+            } else if (existingExercise instanceof MatchingExercise existingME && updatedExercise instanceof MatchingExercise updatedME) {
+                existingME.setPairs(updatedME.getPairs());
             }
+            // No specific updates needed for TranslationExercise beyond common fields
 
-            // Preserve the original lesson if not changed
-            if (exercise.getLesson() == null) {
-                exercise.setLesson(existing.getLesson());
-            } else if (!exercise.getLesson().getId().equals(existing.getLesson().getId())) {
-                // Verify new lesson exists
-                getLessonById(exercise.getLesson().getId());
-            }
-
-            return exerciseRepository.save(exercise);
-        } catch (ObjectOptimisticLockingFailureException ex) {
-            throw new ConflictException("Exercise was modified by another user. Please refresh and try again.");
+            Exercise savedExercise = exerciseRepository.save(existingExercise);
+            logger.info("Updated exercise: {}", savedExercise.getId());
+            return savedExercise;
         } catch (DataIntegrityViolationException ex) {
-            throw new BadRequestException("Invalid exercise data", ex.getMostSpecificCause().getMessage());
+            logger.error("Data integrity violation when updating exercise: {}", ex.getMessage());
+            throw new BadRequestException("Exercise data is invalid or conflicts with existing data.");
+        } catch (ObjectOptimisticLockingFailureException ex) {
+            logger.error("Optimistic locking failure when updating exercise: {}", ex.getMessage());
+            throw new ConflictException("Concurrent modification detected. Please try again.");
         } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to update exercise");
+            logger.error("Database access error when updating exercise: {}", ex.getMessage());
+            throw new InternalServerErrorException("Failed to update exercise due to a database error.");
         }
+    }
+
+    public Exercise getExerciseById(UUID exerciseId) {
+        return exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new NotFoundException("Exercise not found with ID: " + exerciseId));
+    }
+
+    public List<Exercise> getExercisesByLessonId(UUID lessonId) {
+        Lesson lesson = getLessonById(lessonId); // Ensure lesson exists
+        if (lesson == null) {
+            throw new NotFoundException("Lesson not found");
+        }
+        return exerciseRepository.findByLessonId(lessonId);
     }
 
     @Transactional
     public void deleteExercise(UUID exerciseId) {
+        if (!exerciseRepository.existsById(exerciseId)) {
+            throw new NotFoundException("Exercise not found with ID: " + exerciseId);
+        }
         try {
-            Exercise exercise = exerciseRepository.findById(exerciseId)
-                    .orElseThrow(() -> new NotFoundException(Exercise.class, exerciseId));
-
-            exerciseRepository.delete(exercise);
-            appStatsService.decrementExercises();
+            exerciseRepository.deleteById(exerciseId);
+            logger.info("Deleted exercise: {}", exerciseId);
         } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to delete exercise");
+            logger.error("Database access error when deleting exercise: {}", ex.getMessage());
+            throw new InternalServerErrorException("Failed to delete exercise due to a database error.");
         }
     }
 
-    @Transactional(readOnly = true)
-    public Exercise getExerciseById(UUID exerciseId) {
-        try {
-            return exerciseRepository.findById(exerciseId)
-                    .orElseThrow(() -> new NotFoundException(Exercise.class, exerciseId));
-        } catch (DataAccessException ex) {
-            throw new InternalServerErrorException("Failed to retrieve exercise");
-        }
-    }
-
-    // Helper methods
     private Lesson getLessonById(UUID lessonId) {
         return lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new NotFoundException(Lesson.class, lessonId));
+                .orElseThrow(() -> new NotFoundException("Lesson not found with ID: " + lessonId));
     }
 
     private void validateExercise(Exercise exercise) {
@@ -130,6 +126,31 @@ public class ExerciseService {
         }
         if (exercise.getHeartsCost() < 0) {
             throw new BadRequestException("Hearts cost cannot be negative");
+        }
+        if (exercise.getCorrectAnswer() == null || exercise.getCorrectAnswer().isBlank()) {
+            throw new BadRequestException("Correct answer is required for all exercise types");
+        }
+
+        if (exercise instanceof MultipleChoiceExercise mce) {
+            if (mce.getOptions() == null || mce.getOptions().isEmpty()) {
+                throw new BadRequestException("Options are required for multiple choice exercises");
+            }
+            // Ensure the provided correctAnswer for MC is one of the options
+            if (!mce.getOptions().contains(mce.getCorrectAnswer())) {
+                throw new BadRequestException("Correct answer for multiple choice must be one of the provided options.");
+            }
+        } else if (exercise instanceof MatchingExercise me) {
+            if (me.getPairs() == null || me.getPairs().isEmpty()) {
+                throw new BadRequestException("Pairs are required for matching exercises");
+            }
+            // For matching, ensure the correctAnswer string matches the serialized pairs
+            String serializedPairs = me.getPairs().entrySet().stream()
+                    .map(e -> e.getKey() + ":" + e.getValue())
+                    .sorted() // Sort to ensure consistent order for comparison
+                    .collect(Collectors.joining(","));
+            if (!serializedPairs.equalsIgnoreCase(me.getCorrectAnswer())) {
+                throw new BadRequestException("Correct answer for matching exercise does not match the provided pairs.");
+            }
         }
     }
 }
