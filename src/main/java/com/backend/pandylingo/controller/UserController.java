@@ -91,4 +91,38 @@ public class UserController {
             throw new InternalServerErrorException("Failed to update avatar");
         }
     }
+
+
+    @PatchMapping("/xp")
+    public ResponseEntity<GetUserProfileResponse> updateXp(UUID userId, int xp) {
+        Logger logger = Logger.getLogger(UserController.class.getName());
+        try {
+            Optional<User> optionalUser = userRepository.findByIdWithProfile(userId);
+
+            if (optionalUser.isEmpty()) {
+                throw new NotFoundException("User not found");
+            }
+
+            User user = optionalUser.get();
+            logger.info(user.getUserProfile().getLanguageProficiencies().toString());
+
+            UserProfile userProfile = user.getUserProfile();
+            userProfile.setXpPoints(userProfile.getXpPoints() + xp);
+            userRepository.save(user);
+
+            GetUserProfileResponse response = GetUserProfileResponse.builder()
+                    .email(user.getEmail())
+                    .name(user.getFullName())
+                    .avatarUrl(user.getUserProfile().getAvatarUrl())
+                    .lessonsCompleted(25)
+                    .totalXp(user.getUserProfile().getXpPoints())
+                    .streak(user.getUserProfile().getStreak())
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (DataAccessException ex) {
+            throw new InternalServerErrorException("Failed to update avatar");
+        }
+    }
+
 }
